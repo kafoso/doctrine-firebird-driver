@@ -1,0 +1,166 @@
+SET SQL DIALECT 3;
+
+SET NAMES UTF8;
+
+-- Tables
+
+RECREATE TABLE Album (
+    id INT NOT NULL,
+    timeCreated TIMESTAMP NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    artist_id INT DEFAULT NULL,
+    PRIMARY KEY(id)
+);
+
+RECREATE TABLE Album_SongMap (
+    album_id INT NOT NULL,
+    song_id INT NOT NULL
+);
+
+RECREATE TABLE Artist (
+    id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    type_id INT NOT NULL,
+    PRIMARY KEY(id)
+);
+
+RECREATE TABLE Artist_Type (
+    id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    PRIMARY KEY(id)
+);
+
+RECREATE TABLE CASES_CASCADINGREMOVE (
+    id INT NOT NULL,
+    subclass_id INT DEFAULT NULL,
+    PRIMARY KEY(id)
+);
+
+RECREATE TABLE CASES_CASCADINGREMOVE_SUBCLASS (
+    id INT NOT NULL,
+    PRIMARY KEY(id)
+);
+
+RECREATE TABLE Genre (
+    id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    PRIMARY KEY(id)
+);
+
+RECREATE TABLE Song (
+    id INT NOT NULL,
+    timeCreated TIMESTAMP NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    genre_id INT NOT NULL,
+    artist_id INT NOT NULL,
+    durationInSeconds INT DEFAULT NULL,
+    PRIMARY KEY(id)
+);
+
+-- Foreign keys
+
+ALTER TABLE Album ADD CONSTRAINT FK_Album_artist_id FOREIGN KEY (artist_id) REFERENCES Artist(id);
+ALTER TABLE Album_SongMap ADD CONSTRAINT FK_Album_SongMap_album_id FOREIGN KEY (album_id) REFERENCES Album(id);
+ALTER TABLE Album_SongMap ADD CONSTRAINT FK_Album_SongMap_song_id FOREIGN KEY (song_id) REFERENCES Song(id);
+ALTER TABLE Album_SongMap ADD CONSTRAINT UK_Album_SongMap UNIQUE (album_id, song_id);
+ALTER TABLE CASES_CASCADINGREMOVE ADD CONSTRAINT UK_CASES_CASCREM_SUBCLASS_id FOREIGN KEY (subclass_id) REFERENCES CASES_CASCADINGREMOVE_SUBCLASS(id);
+ALTER TABLE Song ADD CONSTRAINT FK_Song_genre_id FOREIGN KEY (genre_id) REFERENCES Genre(id);
+ALTER TABLE Song ADD CONSTRAINT FK_Song_artist_id FOREIGN KEY (artist_id) REFERENCES Artist(id);
+
+-- Data
+
+INSERT INTO Artist_Type (id, name) VALUES (1, 'Unknown');
+INSERT INTO Artist_Type (id, name) VALUES (2, 'Solo');
+INSERT INTO Artist_Type (id, name) VALUES (3, 'Duo');
+INSERT INTO Artist_Type (id, name) VALUES (4, 'Trio');
+INSERT INTO Artist_Type (id, name) VALUES (5, 'Quartet');
+INSERT INTO Artist_Type (id, name) VALUES (6, 'Band');
+
+INSERT INTO Artist (id, name, type_id) VALUES (1, 'Unknown', 1);
+INSERT INTO Artist (id, name, type_id) VALUES (2, 'Britney Spears', 2);
+INSERT INTO Artist (id, name, type_id) VALUES (3, 'Nickelback', 6);
+INSERT INTO Artist (id, name, type_id) VALUES (4, 'AC/DC', 6);
+
+INSERT INTO Genre (id, name) VALUES (1, 'Unclassified genre');
+INSERT INTO Genre (id, name) VALUES (2, 'Rock');
+INSERT INTO Genre (id, name) VALUES (3, 'Pop');
+INSERT INTO Genre (id, name) VALUES (4, 'Classical');
+
+INSERT INTO Album (id, timeCreated, name, artist_id) VALUES (1, '2017-01-01 15:00:00', '...Baby One More Time', 2);
+INSERT INTO Album (id, timeCreated, name, artist_id) VALUES (2, '2017-01-01 15:00:00', 'Dark Horse', 3);
+
+INSERT INTO Song (id, timeCreated, name, genre_id, artist_id, durationInSeconds) VALUES (1, '2017-01-01 15:00:00', '...Baby One More Time', 3, 2, 211);
+INSERT INTO Song (id, timeCreated, name, genre_id, artist_id, durationInSeconds) VALUES (2, '2017-01-01 15:00:00', '(You Drive Me) Crazy', 3, 2, 200);
+
+INSERT INTO Album_SongMap (album_id, song_id) VALUES (1, 1);
+INSERT INTO Album_SongMap (album_id, song_id) VALUES (1, 2);
+
+-- Sequences
+
+CREATE SEQUENCE ALBUM_ID_SEQ;
+ALTER SEQUENCE ALBUM_ID_SEQ RESTART WITH 2;
+
+CREATE SEQUENCE ARTIST_ID_SEQ;
+ALTER SEQUENCE ARTIST_ID_SEQ RESTART WITH 4;
+
+CREATE SEQUENCE ARTIST_TYPE_ID_SEQ;
+ALTER SEQUENCE ARTIST_TYPE_ID_SEQ RESTART WITH 6;
+
+CREATE SEQUENCE GENRE_ID_SEQ;
+ALTER SEQUENCE GENRE_ID_SEQ RESTART WITH 4;
+
+CREATE SEQUENCE SONG_ID_SEQ;
+ALTER SEQUENCE SONG_ID_SEQ RESTART WITH 2;
+
+-- Triggers
+
+SET TERM ^ ;
+
+CREATE OR ALTER TRIGGER ALBUM_ID_AI FOR ALBUM
+ACTIVE BEFORE INSERT POSITION 0
+AS
+BEGIN
+  IF (NEW.ID IS NULL) THEN
+    NEW.ID = GEN_ID(ALBUM_ID_SEQ,1);
+END
+^
+
+CREATE OR ALTER TRIGGER ARTIST_ID_AI FOR ARTIST
+ACTIVE BEFORE INSERT POSITION 0
+AS
+BEGIN
+  IF (NEW.ID IS NULL) THEN
+    NEW.ID = GEN_ID(ARTIST_ID_SEQ,1);
+END
+^
+
+CREATE OR ALTER TRIGGER ARTIST_TYPE_ID_AI FOR ARTIST_TYPE
+ACTIVE BEFORE INSERT POSITION 0
+AS
+BEGIN
+  IF (NEW.ID IS NULL) THEN
+    NEW.ID = GEN_ID(ARTIST_TYPE_ID_SEQ,1);
+END
+^
+
+CREATE OR ALTER TRIGGER GENRE_ID_AI FOR GENRE
+ACTIVE BEFORE INSERT POSITION 0
+AS
+BEGIN
+  IF (NEW.ID IS NULL) THEN
+    NEW.ID = GEN_ID(GENRE_ID_SEQ,1);
+END
+^
+
+CREATE OR ALTER TRIGGER SONG_ID_AI FOR SONG
+ACTIVE BEFORE INSERT POSITION 0
+AS
+BEGIN
+  IF (NEW.ID IS NULL) THEN
+    NEW.ID = GEN_ID(SONG_ID_SEQ,1);
+END
+^
+
+SET TERM ; ^
+
+COMMIT;
