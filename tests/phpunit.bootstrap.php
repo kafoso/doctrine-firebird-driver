@@ -20,7 +20,7 @@ $configuration = new FirebirdInterbase\Configuration(
     null,
     '/var/lib/firebird/2.5/data/music_library.fdb',
     'SYSDBA',
-    'tigerdyr76',
+    '88fb9f307125cc397f70e59c749715e1',
     'UTF-8'
 );
 $driver = new FirebirdInterbase\Driver($configuration);
