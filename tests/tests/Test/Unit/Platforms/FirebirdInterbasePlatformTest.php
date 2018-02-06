@@ -2,6 +2,7 @@
 namespace IST\DoctrineFirebirdDriver\Test\Unit\Platforms;
 
 use IST\DoctrineFirebirdDriver\Platforms\FirebirdInterbasePlatform;
+use IST\DoctrineFirebirdDriver\Platforms\Keywords\FirebirdInterbaseKeywords;
 
 /**
  * Tests primarily functional aspects of the platform class. For SQL tests, see FirebirdInterbasePlatformSQLTest.
@@ -13,6 +14,10 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
         $this->assertInternalType("string", $this->_platform->getName());
         $this->assertSame("FirebirdInterbase", $this->_platform->getName());
     }
+
+    /**
+     * FROM: @link https://github.com/ISTDK/doctrine-dbal/blob/master/tests/Doctrine/Tests/DBAL/Platforms/AbstractPlatformTestCase.php
+     */
 
     public function testGetMaxIdentifierLength()
     {
@@ -44,6 +49,71 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
         $this->assertInternalType("string", $found);
         $this->assertSame("'foo'", $found);
     }
+
+    public function testQuoteIdentifier()
+    {
+        $c = $this->_platform->getIdentifierQuoteCharacter();
+        $this->assertEquals($c."test".$c, $this->_platform->quoteIdentifier("test"));
+        $this->assertEquals($c."test".$c.".".$c."test".$c, $this->_platform->quoteIdentifier("test.test"));
+        $this->assertEquals(str_repeat($c, 4), $this->_platform->quoteIdentifier($c));
+    }
+
+    /**
+     * @group DDC-1360
+     */
+    public function testQuoteSingleIdentifier()
+    {
+        $c = $this->_platform->getIdentifierQuoteCharacter();
+        $this->assertEquals($c."test".$c, $this->_platform->quoteSingleIdentifier("test"));
+        $this->assertEquals($c."test.test".$c, $this->_platform->quoteSingleIdentifier("test.test"));
+        $this->assertEquals(str_repeat($c, 4), $this->_platform->quoteSingleIdentifier($c));
+    }
+
+    public function testGetInvalidForeignKeyReferentialActionSQLThrowsException()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        $this->_platform->getForeignKeyReferentialActionSQL('unknown');
+    }
+
+    public function testGetUnknownDoctrineMappingTypeThrowsException()
+    {
+        $this->setExpectedException('Doctrine\DBAL\DBALException');
+        $this->_platform->getDoctrineTypeMapping('foobar');
+    }
+
+    public function testRegisterDoctrineMappingType()
+    {
+        $this->_platform->registerDoctrineTypeMapping('foo', 'integer');
+        $this->assertEquals('integer', $this->_platform->getDoctrineTypeMapping('foo'));
+    }
+
+    public function testRegisterUnknownDoctrineMappingTypeThrowsException()
+    {
+        $this->setExpectedException('Doctrine\DBAL\DBALException');
+        $this->_platform->registerDoctrineTypeMapping('foo', 'bar');
+    }
+
+    public function testCreateWithNoColumnsThrowsException()
+    {
+        $table = new \Doctrine\DBAL\Schema\Table('test');
+        $this->setExpectedException('Doctrine\DBAL\DBALException');
+        $this->_platform->getCreateTableSQL($table);
+    }
+
+    /**
+     * @group DBAL-45
+     */
+    public function testKeywordList()
+    {
+        $keywordList = $this->_platform->getReservedKeywordsList();
+        $this->assertInstanceOf(FirebirdInterbaseKeywords::class, $keywordList);
+        $this->assertInstanceOf('Doctrine\DBAL\Platforms\Keywords\KeywordList', $keywordList);
+        $this->assertTrue($keywordList->isKeyword('table'));
+    }
+
+    /**
+     * CUSTOM
+     */
 
     public function testGeneratePrimaryKeyConstraintName()
     {
