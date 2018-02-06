@@ -1,8 +1,8 @@
 <?php
 namespace IST\DoctrineFirebirdDriver\Test\Integration\Doctrine\ORM\EntityManager\Repository;
 
-use IST\DoctrineFirebirdDriver\Test\AbstractIntegrationTest;
-use IST\DoctrineFirebirdDriver\Test\Entity;
+use IST\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
+use IST\DoctrineFirebirdDriver\Test\Resource\Entity;
 
 class FindByTest extends AbstractIntegrationTest
 {

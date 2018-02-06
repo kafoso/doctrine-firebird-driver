@@ -2,8 +2,10 @@
 namespace IST\DoctrineFirebirdDriver\Platforms;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Schema\Identifier;
 use Doctrine\DBAL\Schema\TableDiff;
 use Doctrine\DBAL\Schema\Table;
+use IST\DoctrineFirebirdDriver\Platforms\Keywords\FirebirdInterbaseKeywords;
 
 class FirebirdInterbasePlatform extends AbstractPlatform
 {
@@ -69,7 +71,7 @@ class FirebirdInterbasePlatform extends AbstractPlatform
         $needQuote = false;
         $fullId = '';
         $shortId = '';
-        is_array($prefix) || $prefix = array($prefix);
+        is_array($prefix) || $prefix = [$prefix];
         $ml = floor(($maxLength - strlen($suffix)) / count($prefix));
         foreach ($prefix as $p) {
             if (!$p instanceof \Doctrine\DBAL\Schema\AbstractAsset)
@@ -95,8 +97,8 @@ class FirebirdInterbasePlatform extends AbstractPlatform
     /**
      * Quotes a SQL-Statement
      *
-     * @param type $statement
-     * @return type
+     * @param string $statement
+     * @return string
      */
     protected function quoteSql($statement)
     {
@@ -114,7 +116,7 @@ class FirebirdInterbasePlatform extends AbstractPlatform
      */
     protected function generatePrimaryKeyConstraintName($aTable)
     {
-        return $this->generateIdentifier(array($aTable), 'PK', $this->getMaxConstraintIdentifierLength())->getQuotedName($this);
+        return $this->generateIdentifier([$aTable], 'PK', $this->getMaxConstraintIdentifierLength())->getQuotedName($this);
     }
 
     /**
@@ -234,7 +236,7 @@ class FirebirdInterbasePlatform extends AbstractPlatform
      */
     public function getIdentitySequenceName($tableName, $columnName)
     {
-        return $this->generateIdentifier(array($tableName), 'D2IS', $this->getMaxIdentifierLength())->getQuotedName($this);
+        return $this->generateIdentifier([$tableName], 'D2IS', $this->getMaxIdentifierLength())->getQuotedName($this);
     }
 
     /**
@@ -242,7 +244,7 @@ class FirebirdInterbasePlatform extends AbstractPlatform
      */
     public function getIdentitySequenceTriggerName($tableName, $columnName)
     {
-        return $this->generateIdentifier(array($tableName), 'D2IT', $this->getMaxIdentifierLength())->getQuotedName($this);
+        return $this->generateIdentifier([$tableName], 'D2IT', $this->getMaxIdentifierLength())->getQuotedName($this);
     }
 
     /**
@@ -345,20 +347,19 @@ class FirebirdInterbasePlatform extends AbstractPlatform
     protected function doModifyLimitQuery($query, $limit, $offset)
     {
         if ($limit === NULL && $offset === NULL)
-            return $query; // No limitation specified - change nothing ===> RETURN
+            return $query; // No limitation specified - change nothing
 
         if ($offset === NULL) {
             // A limit is specified, but no offset, so the syntax ROWS <n> is used
-            return $query . ' ROWS ' . (int) $limit; // ===> RETURN
-        } else {
-            $from = (int) $offset + 1; // Firebird starts the offset at 1
-            if ($limit === NULL) {
-                $to = '9000000000000000000'; // should be beyond a reasonable  number of rows
-            } else {
-                $to = $from + $limit - 1;
-            }
-            return $query . ' ROWS ' . $from . ' TO ' . $to . ' '; // ===> RETURN
+            return $query . ' ROWS ' . (int) $limit;
         }
+        $from = (int) $offset + 1; // Firebird starts the offset at 1
+        if ($limit === NULL) {
+            $to = '9000000000000000000'; // should be beyond a reasonable  number of rows
+        } else {
+            $to = $from + $limit - 1;
+        }
+        return $query . ' ROWS ' . $from . ' TO ' . $to;
     }
 
     public function getListTablesSQL()
@@ -387,7 +388,6 @@ class FirebirdInterbasePlatform extends AbstractPlatform
     /**
      * Generates simple sql expressions usually used in metadata-queries
      *
-     * @param type $aMetadataTable
      * @param array $expressions
      * @return string
      */
@@ -423,6 +423,15 @@ class FirebirdInterbasePlatform extends AbstractPlatform
         return 'SELECT 1 FROM RDB$DATABASE';
     }
 
+    /**
+     * {@inheritDoc}
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function getDropDatabaseSQL($database)
+    {
+        throw \Doctrine\DBAL\DBALException::notSupported(__METHOD__);
+    }
+
     public function getCreateViewSQL($name, $sql)
     {
         return 'CREATE VIEW ' . $name . ' AS ' . $sql;
@@ -441,12 +450,15 @@ class FirebirdInterbasePlatform extends AbstractPlatform
      */
     protected function getExecuteBlockSql(array $params = array())
     {
-        $params = array_merge(array(
-            'blockParams' => array(),
-            'blockVars' => array(),
-            'statements' => array(),
-            'formatLineBreak' => true,
-                ), $params);
+        $params = array_merge(
+            [
+                'blockParams' => [],
+                'blockVars' => [],
+                'statements' => [],
+                'formatLineBreak' => true,
+            ],
+            $params
+        );
 
         if ($params['formatLineBreak']) {
             $break = "\n";
@@ -487,17 +499,20 @@ class FirebirdInterbasePlatform extends AbstractPlatform
      * @param array|string $sql Statement(s) to execute.
      * @param array $params
      * @param array $variableDeclarations
-     * @return type
+     * @return string
      */
     protected function getExecuteBlockWithExecuteStatementsSql(array $params = array())
     {
-        $params = array_merge(array(
-            'blockParams' => array(),
-            'blockVars' => array(),
-            'statements' => array(),
-            'formatLineBreak' => true,
-                ), $params);
-        $statements = array();
+        $params = array_merge(
+            [
+                'blockParams' => [],
+                'blockVars' => [],
+                'statements' => [],
+                'formatLineBreak' => true,
+            ],
+            $params
+        );
+        $statements = [];
         foreach ((array) $params['statements'] as $s) {
             $statements[] = $this->getExecuteStatementPSql($s) . ';';
         }
@@ -525,9 +540,15 @@ class FirebirdInterbasePlatform extends AbstractPlatform
                 'EXECUTE STATEMENT \'DROP VIEW "\'||:TMP_VIEW_NAME||\'"\'; END';
 
         if ($inBlock) {
-            $result = $this->getExecuteBlockSql(array('statements' => $result,
-                'formatLineBreak' => false,
-                'blockVars' => array('TMP_VIEW_NAME' => 'varchar(255)')));
+            $result = $this->getExecuteBlockSql(
+                [
+                    'statements' => $result,
+                    'formatLineBreak' => false,
+                    'blockVars' => [
+                        'TMP_VIEW_NAME' => 'varchar(255)',
+                    ]
+                ]
+            );
         }
 
         return $result;
@@ -547,14 +568,14 @@ class FirebirdInterbasePlatform extends AbstractPlatform
     public function getAlterSequenceSQL(\Doctrine\DBAL\Schema\Sequence $sequence)
     {
         return 'ALTER SEQUENCE ' . $sequence->getQuotedName($this) .
-                ' RESTART WITH ' . $sequence->getInitialValue() - 1;
+                ' RESTART WITH ' . ($sequence->getInitialValue() - 1);
     }
 
     /**
      * Generates a execute statement PSQL-Statement
      *
-     * @param type $aStatement
-     * @return type
+     * @param string $aStatement
+     * @return string
      */
     protected function getExecuteStatementPSql($aStatement)
     {
@@ -572,8 +593,8 @@ class FirebirdInterbasePlatform extends AbstractPlatform
     /**
      * Returns a simple DROP TRIGGER statement
      *
-     * @param type $aTrigger
-     * @return type
+     * @param string $aTrigger
+     * @return string
      */
     protected function getDropTriggerSql($aTrigger)
     {
@@ -582,14 +603,21 @@ class FirebirdInterbasePlatform extends AbstractPlatform
 
     protected function getDropTriggerIfExistsPSql($aTrigger, $inBlock = false)
     {
-        $result = 'IF (EXISTS (SELECT 1 FROM RDB$TRIGGERS WHERE ' . $this->makeSimpleMetadataSelectExpression(array(
-                    'RDB$TRIGGER_NAME' => $aTrigger,
-                    'RDB$SYSTEM_FLAG' => 0
-                )) . ')) THEN BEGIN ' . $this->getExecuteStatementPSql($this->getDropTriggerSql($aTrigger)) . '; END';
-        if ($inBlock)
-            return $this->getExecuteBlockSql(array('statements' => $result, 'formatLineBreak' => false));
-        else
-            return $result;
+        $result = sprintf(
+            'IF (EXISTS (SELECT 1 FROM RDB$TRIGGERS WHERE %s)) THEN BEGIN %s; END',
+            $this->makeSimpleMetadataSelectExpression([
+                'RDB$TRIGGER_NAME' => $aTrigger,
+                'RDB$SYSTEM_FLAG' => 0,
+            ]),
+            $this->getExecuteStatementPSql($this->getDropTriggerSql($aTrigger))
+        );
+        if ($inBlock) {
+            return $this->getExecuteBlockSql([
+                'statements' => $result,
+                'formatLineBreak' => false,
+            ]);
+        }
+        return $result;
     }
 
     protected function getCombinedSqlStatements($sql, $aSeparator)
@@ -600,8 +628,8 @@ class FirebirdInterbasePlatform extends AbstractPlatform
                 $result .= is_array($stm) ? $this->getCombinedSqlStatements($stm) : $stm . $aSeparator;
             }
             return $result;
-        } else
-            return $sql . $aSeparator;
+        }
+        return $sql . $aSeparator;
     }
 
     /**
@@ -616,13 +644,14 @@ class FirebirdInterbasePlatform extends AbstractPlatform
         if (stripos($sequence, '_D2IS')) {
             // Seems to be a autoinc-sequence. Try to drop trigger before
             $triggerName = str_replace('_D2IS', '_D2IT', $sequence);
-            return $this->getExecuteBlockWithExecuteStatementsSql(array(
-                        'statements' => array(
-                            $this->getDropTriggerIfExistsPSql($triggerName, true),
-                            $this->getPlainDropSequenceSQL($sequence))));
-        } else {
-            return $this->getPlainDropSequenceSQL($sequence);
+            return $this->getExecuteBlockWithExecuteStatementsSql([
+                'statements' => [
+                    $this->getDropTriggerIfExistsPSql($triggerName, true),
+                    $this->getPlainDropSequenceSQL($sequence)
+                ],
+            ]);
         }
+        return $this->getPlainDropSequenceSQL($sequence);
     }
 
     /**
@@ -638,8 +667,8 @@ class FirebirdInterbasePlatform extends AbstractPlatform
     /**
      * Returns just the function used to get the next value of a sequence
      *
-     * @param type $sequenceName
-     * @return type
+     * @param string $sequenceName
+     * @return string
      */
     public function getSequenceNextValFunctionSQL($sequenceName)
     {
@@ -649,8 +678,8 @@ class FirebirdInterbasePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      *
-     * @param type $sequenceName
-     * @return type
+     * @param string $sequenceName
+     * @return string
      */
     public function getSequenceNextValSQL($sequenceName)
     {
@@ -666,7 +695,7 @@ class FirebirdInterbasePlatform extends AbstractPlatform
      */
     public function getSetTransactionIsolationSQL($level)
     {
-
+        return parent::getSetTransactionIsolationSQL($level);
     }
 
     /**
@@ -698,20 +727,20 @@ class FirebirdInterbasePlatform extends AbstractPlatform
      *
      * NOTE: This statement also tries to drop related views and the trigger used to simulate autoinc-fields
      *
-     * @param type $table
+     * @param string $table
      */
     public function getDropTableSQL($table)
     {
         $dropTriggerIfExistsPSql = $this->getDropTriggerIfExistsPSql($this->getIdentitySequenceTriggerName($table, null), true);
         $dropRelatedViewsPSql = $this->getDropAllViewsOfTablePSqlSnippet($table, true);
         $dropTableSql = parent::getDropTableSQL($table);
-        return $this->getExecuteBlockWithExecuteStatementsSql(array(
-                    'statements' => array(
-                        $dropTriggerIfExistsPSql,
-                        $dropRelatedViewsPSql,
-                        $dropTableSql,
-                    ),
-        ));
+        return $this->getExecuteBlockWithExecuteStatementsSql([
+            'statements' => [
+                $dropTriggerIfExistsPSql,
+                $dropRelatedViewsPSql,
+                $dropTableSql,
+            ],
+        ]);
     }
 
     /**
@@ -727,7 +756,7 @@ class FirebirdInterbasePlatform extends AbstractPlatform
      */
     protected function initializeDoctrineTypeMappings()
     {
-        $this->doctrineTypeMapping = array(
+        $this->doctrineTypeMapping = [
             'boolean' => 'boolean',
             'tinyint' => 'smallint',
             'smallint' => 'smallint',
@@ -756,7 +785,7 @@ class FirebirdInterbasePlatform extends AbstractPlatform
             'blob sub_type text' => 'text',
             'blob sub_type binary' => 'blob',
             'short' => 'smallint',
-        );
+        ];
     }
 
     /**
@@ -774,9 +803,9 @@ class FirebirdInterbasePlatform extends AbstractPlatform
      */
     public function getAlterTableSQL(TableDiff $diff)
     {
-        $sql = array();
-        $commentsSQL = array();
-        $columnSql = array();
+        $sql = [];
+        $commentsSQL = [];
+        $columnSql = [];
 
         foreach ($diff->addedColumns as $column) {
             if ($this->onSchemaAlterTableAddColumn($column, $diff, $columnSql)) {
@@ -874,7 +903,7 @@ class FirebirdInterbasePlatform extends AbstractPlatform
                     ' ALTER COLUMN ' . $oldColumnName->getQuotedName($this) . ' TO ' . $column->getQuotedName($this);
         }
 
-        $tableSql = array();
+        $tableSql = [];
 
         if (!$this->onSchemaAlterTable($diff, $tableSql)) {
             $sql = array_merge($sql, $commentsSQL);
@@ -884,7 +913,7 @@ class FirebirdInterbasePlatform extends AbstractPlatform
             }
 
             $sql = array_merge(
-                    $this->getPreAlterTableIndexForeignKeySQL($diff), $sql, $this->getPostAlterTableIndexForeignKeySQL($diff)
+                $this->getPreAlterTableIndexForeignKeySQL($diff), $sql, $this->getPostAlterTableIndexForeignKeySQL($diff)
             );
         }
 
@@ -916,7 +945,7 @@ class FirebirdInterbasePlatform extends AbstractPlatform
      */
     protected function getReservedKeywordsClass()
     {
-        return '\Doctrine\DBAL\Platforms\Keywords\FbIbKeywords';
+        return FirebirdInterbaseKeywords::class;
     }
 
     /**
@@ -990,7 +1019,16 @@ class FirebirdInterbasePlatform extends AbstractPlatform
      */
     protected function getVarcharTypeDeclarationSQLSnippet($length, $fixed)
     {
-        return $fixed ? ($length ? 'CHAR(' . $length . ')' : 'CHAR(255)') : ($length ? 'VARCHAR(' . $length . ')' : 'VARCHAR(255)');
+        if ($fixed) {
+            if ($length) {
+                return 'CHAR(' . $length . ')';
+            }
+            return 'CHAR(255)';
+        }
+        if ($length) {
+            return 'VARCHAR(' . $length . ')';
+        }
+        return 'VARCHAR(255)';
     }
 
     /**
@@ -1004,10 +1042,10 @@ class FirebirdInterbasePlatform extends AbstractPlatform
      */
     public function getColumnCharsetDeclarationSQL($charset)
     {
-        if (!empty($charset))
+        if (!empty($charset)) {
             return ' CHARACTER SET ' . $charset;
-        else
-            return '';
+        }
+        return '';
     }
 
     /**
@@ -1015,12 +1053,24 @@ class FirebirdInterbasePlatform extends AbstractPlatform
      */
     protected function getBinaryTypeDeclarationSQLSnippet($length, $fixed)
     {
-        return $fixed ? 'CHAR(' . ($length ? : $this->getBinaryDefaultLength()) . ')' : 'VARCHAR(' . ($length ? : $this->getBinaryDefaultLength()) . ')';
+        if ($length > $this->getBinaryMaxLength()) {
+            return 'BLOB';
+        }
+        if ($fixed) {
+            if ($length) {
+                return 'CHAR(' . $length . ')';
+            }
+            return 'CHAR(' . $this->getBinaryDefaultLength() . ')';
+        }
+        if ($length) {
+            return 'VARCHAR(' . $length . ')';
+        }
+        return 'VARCHAR(' . $this->getBinaryDefaultLength() . ')';
     }
 
     /**
      * {@inheritDoc}
-     * @param type $name
+     * @param string $name
      * @param array $field
      */
     public function getColumnDeclarationSQL($name, array $field)
@@ -1057,8 +1107,8 @@ class FirebirdInterbasePlatform extends AbstractPlatform
 
         $isTemporary = (isset($options['temporary']) && !empty($options['temporary']));
 
-        $indexes = isset($options['indexes']) ? $options['indexes'] : array();
-        $options['indexes'] = array();
+        $indexes = isset($options['indexes']) ? $options['indexes'] : [];
+        $options['indexes'] = [];
 
 
         $columnListSql = $this->getColumnDeclarationListSQL($columns);
@@ -1080,7 +1130,7 @@ class FirebirdInterbasePlatform extends AbstractPlatform
         }
 
         $query = 'CREATE ' .
-                ($isTemporary ? $this->getTemporaryTableSQL() : '') .
+                ($isTemporary ? $this->getTemporaryTableSQL() . ' ' : '') .
                 'TABLE ' . $tableName;
 
         $query .= ' (' . $columnListSql;
@@ -1092,7 +1142,7 @@ class FirebirdInterbasePlatform extends AbstractPlatform
         $query .= ')';
 
         if ($isTemporary) {
-            $query .= 'ON COMMIT PRESERVE ROWS';   // Session level temporary tables
+            $query .= ' ON COMMIT PRESERVE ROWS';   // Session level temporary tables
         }
 
         $sql[] = $query;
@@ -1127,7 +1177,7 @@ class FirebirdInterbasePlatform extends AbstractPlatform
 
     public function getCreateAutoincrementSql($column, $tableName)
     {
-        $sql = array();
+        $sql = [];
 
         if (!$column instanceof \Doctrine\DBAL\Schema\AbstractAsset)
             $column = new \Doctrine\DBAL\Schema\Identifier($column);
@@ -1153,13 +1203,25 @@ class FirebirdInterbasePlatform extends AbstractPlatform
         return $sql;
     }
 
+    /**
+     * Returns the SQL statements to drop the autoincrement for the given table name.
+     *
+     * @param string $table The table name to drop the autoincrement for.
+     *
+     * @return array
+     */
     public function getDropAutoincrementSql($table)
     {
-        $sequence = new \Doctrine\DBAL\Schema\Sequence($this->generateIdentifier($tableName, '_D2IS', $this->getMaxIdentifierLength()));
-
-        $sql[] = 'DROP TRIGGER ' . $sequence->getQuotedName($this);
-        $sql[] = $this->getDropSequenceSQL($sequence->getQuotedName($this));
-
+        $table = $this->normalizeIdentifier($table);
+        $autoincrementIdentifierName = $this->getAutoincrementIdentifierName($table);
+        $identitySequenceName = $this->getIdentitySequenceName(
+            $table->isQuoted() ? $table->getQuotedName($this) : $table->getName(),
+            ''
+        );
+        $sql = [];
+        $sql[] = 'DROP TRIGGER ' . $autoincrementIdentifierName;
+        $sql[] = $this->getDropSequenceSQL($identitySequenceName);
+        $sql[] = $this->getDropConstraintSQL($autoincrementIdentifierName, $table->getQuotedName($this));
         return $sql;
     }
 
@@ -1312,16 +1374,15 @@ ___query___;
      * Returns a quoted name if necessar
      *
      * @param string|\Doctrine\DBAL\Schema\Identifier $name
-     * @return type
+     * @return string
      */
     protected function getQuotedNameOf($name)
     {
         if ($name instanceof \Doctrine\DBAL\Schema\AbstractAsset) {
             return $name->getQuotedName($this);
-        } else {
-            $id = new \Doctrine\DBAL\Schema\Identifier($name);
-            return $id->getQuotedName($this);
         }
+        $id = new \Doctrine\DBAL\Schema\Identifier($name);
+        return $id->getQuotedName($this);
     }
 
     /**
@@ -1353,4 +1414,11 @@ ___query___;
         }
     }
 
+    private function getAutoincrementIdentifierName(Identifier $table)
+    {
+        $identifierName = $table->getName() . '_AI_PK';
+        return $table->isQuoted()
+            ? $this->quoteSingleIdentifier($identifierName)
+            : $identifierName;
+    }
 }

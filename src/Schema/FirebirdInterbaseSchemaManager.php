@@ -38,10 +38,10 @@ class FirebirdInterbaseSchemaManager extends AbstractSchemaManager
 
     protected function _getPortableUserDefinition($user)
     {
-        return array(
+        return [
             'user' => $user['User'],
             'password' => $user['Password'],
-        );
+        ];
     }
 
     /**
@@ -88,13 +88,13 @@ class FirebirdInterbaseSchemaManager extends AbstractSchemaManager
     protected function _getPortableTableColumnDefinition($tableColumn)
     {
 
-        $options = array();
+        $options = [];
 
         $tableColumn = array_change_key_case($tableColumn, CASE_UPPER);
 
         $dbType = strtolower($tableColumn['FIELD_TYPE_NAME']);
 
-        $type = array();
+        $type = [];
         $fixed = null;
 
         if (!isset($tableColumn['FIELD_NAME'])) {
@@ -174,12 +174,14 @@ class FirebirdInterbaseSchemaManager extends AbstractSchemaManager
 
         $options['notnull'] = (bool) $tableColumn['FIELD_NOT_NULL_FLAG'];
 
-        $options = array_merge($options, array(
-            'unsigned' => (bool) (strpos($dbType, 'unsigned') !== false),
-            'fixed' => (bool) $fixed,
-            'scale' => null,
-            'precision' => null,
-                )
+        $options = array_merge(
+            $options,
+            [
+                'unsigned' => (bool) (strpos($dbType, 'unsigned') !== false),
+                'fixed' => (bool) $fixed,
+                'scale' => null,
+                'precision' => null,
+            ]
         );
 
         if ($scale !== null && $precision !== null) {
@@ -192,7 +194,7 @@ class FirebirdInterbaseSchemaManager extends AbstractSchemaManager
 
     protected function _getPortableTableForeignKeysList($tableForeignKeys)
     {
-        $list = array();
+        $list = [];
         foreach ($tableForeignKeys as $key => $value) {
             $value = array_change_key_case($value, CASE_LOWER);
             if (!isset($list[$value['constraint_name']])) {
@@ -203,26 +205,30 @@ class FirebirdInterbaseSchemaManager extends AbstractSchemaManager
                     $value['on_update'] = null;
                 }
 
-                $list[$value['constraint_name']] = array(
+                $list[$value['constraint_name']] = [
                     'name' => $value['constraint_name'],
-                    'local' => array(),
-                    'foreign' => array(),
+                    'local' => [],
+                    'foreign' => [],
                     'foreignTable' => $value['references_table'],
                     'onDelete' => $value['on_delete'],
                     'onUpdate' => $value['on_update'],
-                );
+                ];
             }
             $list[$value['constraint_name']]['local'][] = strtolower($value['field_name']);
 			$list[$value['constraint_name']]['foreign'][] = strtolower($value['references_field']);
         }
 
-        $result = array();
+        $result = [];
         foreach ($list as $constraint) {
             $result[] = new \Doctrine\DBAL\Schema\ForeignKeyConstraint(
-                    array_values($constraint['local']), $constraint['foreignTable'], array_values($constraint['foreign']), $constraint['name'], array(
-                'onDelete' => $constraint['onDelete'],
-                'onUpdate' => $constraint['onUpdate'],
-                    )
+                array_values($constraint['local']),
+                $constraint['foreignTable'],
+                array_values($constraint['foreign']),
+                $constraint['name'],
+                [
+                    'onDelete' => $constraint['onDelete'],
+                    'onUpdate' => $constraint['onUpdate'],
+                ]
             );
         }
 
@@ -231,7 +237,7 @@ class FirebirdInterbaseSchemaManager extends AbstractSchemaManager
 
     protected function _getPortableTableIndexesList($tableIndexes, $tableName = null)
     {
-        $mangledData = array();
+        $mangledData = [];
         foreach ($tableIndexes as $tableIndex) {
 
             $tableIndex = \array_change_key_case($tableIndex, CASE_LOWER);

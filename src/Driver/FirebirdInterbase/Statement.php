@@ -34,12 +34,12 @@ class Statement implements \IteratorAggregate, StatementInterace
      * Zero-Based List of parameter bindings
      * @var array
      */
-    protected $queryParamBindings = array();
+    protected $queryParamBindings = [];
     /**
      * Zero-Based List of parameter binding types
      * @var array
      */
-    protected $queryParamTypes = array();
+    protected $queryParamTypes = [];
     /**
      * @var integer Default fetch mode set by setFetchMode
      */
@@ -113,12 +113,15 @@ class Statement implements \IteratorAggregate, StatementInterace
     {
         $errorCode = $this->errorCode();
         if ($errorCode) {
-            return array(
+            return [
                 'code' => $this->errorCode(),
-                'message' => ibase_errmsg());
-        } else {
-            return array('code' => 0, 'message' => null);
+                'message' => ibase_errmsg(),
+            ];
         }
+        return [
+            'code' => 0,
+            'message' => null,
+        ];
     }
 
     /**
@@ -198,7 +201,7 @@ class Statement implements \IteratorAggregate, StatementInterace
             case \PDO::FETCH_CLASS: {
                     $this->defaultFetchMode = $fetchMode;
                     $this->defaultFetchClass = is_string($arg2) ? $arg2 : '\stdClass';
-                    $this->defaultFetchClassConstructorArgs = is_array($arg3) ? $arg3 : array();
+                    $this->defaultFetchClassConstructorArgs = is_array($arg3) ? $arg3 : [];
                     break;
                 }
             case \PDO::FETCH_INTO: {
@@ -350,7 +353,7 @@ class Statement implements \IteratorAggregate, StatementInterace
             case \PDO::FETCH_CLASS:
                 return $this->internalFetchClassOrObject(isset($optArg1) ? $optArg1 : $this->defaultFetchClass, $this->defaultFetchClassConstructorArgs);
             case \PDO::FETCH_INTO:
-                return $this->internalFetchClassOrObject(isset($optArg1) ? $optArg1 : $this->defaultFetchInto, array());
+                return $this->internalFetchClassOrObject(isset($optArg1) ? $optArg1 : $this->defaultFetchInto, []);
             case \PDO::FETCH_ASSOC:
                 return $this->internalFetchAssoc();
                 break;
@@ -432,7 +435,7 @@ class Statement implements \IteratorAggregate, StatementInterace
      */
     protected function internalFetchAllColumn($columnIndex = 0)
     {
-        $result = array();
+        $result = [];
         while ($data = $this->internalFetchColumn()) {
             $result[] = $data;
         }
@@ -445,7 +448,7 @@ class Statement implements \IteratorAggregate, StatementInterace
      */
     protected function internalFetchAllAssoc()
     {
-        $result = array();
+        $result = [];
         while ($data = $this->internalFetchAssoc()) {
             $result[] = $data;
         }
@@ -467,7 +470,7 @@ class Statement implements \IteratorAggregate, StatementInterace
      */
     protected function internalFetchAllNum()
     {
-        $result = array();
+        $result = [];
         while ($data = $this->internalFetchNum()) {
             $result[] = $data;
         }
@@ -480,7 +483,7 @@ class Statement implements \IteratorAggregate, StatementInterace
      */
     protected function internalFetchAllBoth()
     {
-        $result = array();
+        $result = [];
         while ($data = $this->internalFetchBoth()) {
             $result[] = $data;
         }
@@ -498,7 +501,7 @@ class Statement implements \IteratorAggregate, StatementInterace
     {
         $rowData = $this->internalFetchAssoc();
         if (is_array($rowData)) {
-            return $this->createObjectAndSetPropertiesCaseInsenstive($aClassOrObject, is_array($constructorArguments) ? $constructorArguments : array(), $rowData);
+            return $this->createObjectAndSetPropertiesCaseInsenstive($aClassOrObject, is_array($constructorArguments) ? $constructorArguments : [], $rowData);
         } else {
             return $rowData;
         }
@@ -513,7 +516,7 @@ class Statement implements \IteratorAggregate, StatementInterace
      */
     protected function internalFetchAllClassOrObjects($aClassOrObject, array $constructorArguments)
     {
-        $result = array();
+        $result = [];
         while ($row = $this->internalFetchClassOrObject($aClassOrObject, $constructorArguments)) {
             if ($row !== false) {
                 $result[] = $row;
@@ -582,7 +585,7 @@ class Statement implements \IteratorAggregate, StatementInterace
     protected function setStatement($statement)
     {
         $this->statement = $statement;
-        $this->namedParamsMap = array();
+        $this->namedParamsMap = [];
         $pp = \Doctrine\DBAL\SQLParserUtils::getPlaceholderPositions($statement, false);
         if (!empty($pp)) {
             $pidx = 0; // index-position of the parameter

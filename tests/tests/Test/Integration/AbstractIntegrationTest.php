@@ -1,5 +1,5 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Test;
+namespace IST\DoctrineFirebirdDriver\Test\Integration;
 
 use Doctrine\ORM\EntityManager;
 

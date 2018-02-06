@@ -1,9 +1,19 @@
 Doctrine Firebird driver
 ---------------------------
 
-Firebird driver for the Doctrine DBAL (https://github.com/doctrine/dbal).
+Firebird driver for the Doctrine DBAL (https://github.com/doctrine/dbal) version 2.5+.
 
-# Installation to run tests
+# Requirements
+
+- PHP >= 5.6
+
+# Installation
+
+...
+
+# Tests
+
+## Installation to run tests
 
 1. `vagrant up` (install the VM)
 2. `vagrant ssh`
@@ -15,7 +25,7 @@ Firebird driver for the Doctrine DBAL (https://github.com/doctrine/dbal).
 
 Reference: https://firebirdsql.org/manual/ubusetup.html
 
-# Running tests
+## Running tests
 
 Due to the database being created by the PHP bootstrap script on the fly, `root` is needed to run the tests **on the VM**.
 

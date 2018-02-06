@@ -1,5 +1,5 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Test\Entity;
+namespace IST\DoctrineFirebirdDriver\Test\Resource\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -7,9 +7,9 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="ALBUM")
+ * @ORM\Table(name="SONG")
  */
-class Album
+class Song
 {
     /**
      * @ORM\Column(type="integer")
@@ -29,42 +29,48 @@ class Album
     private $name;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Artist", inversedBy="albums", cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity="Album")
+     * @ORM\JoinTable(
+     *   name="Album_SongMap",
+     *   joinColumns={
+     *     @ORM\JoinColumn(name="song_id", referencedColumnName="id")
+     *   },
+     *   inverseJoinColumns={
+     *     @ORM\JoinColumn(name="album_id", referencedColumnName="id", unique=true)
+     *   }
+     * )
+     */
+    private $albums;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Genre", inversedBy="songs")
+     */
+    private $genre;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Artist", inversedBy="albums")
      */
     private $artist = null;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Song")
-     * @ORM\JoinTable(
-     *   name="Album_SongMap",
-     *   joinColumns={
-     *     @ORM\JoinColumn(name="album_id", referencedColumnName="id")
-     *   },
-     *   inverseJoinColumns={
-     *     @ORM\JoinColumn(name="song_id", referencedColumnName="id", unique=true)
-     *   }
-     * )
-     */
-    private $songs;
-
-    /**
      * @param string $name
      */
-    public function __construct($name)
+    public function __construct($name, Genre $genre)
     {
         $this->timeCreated = new \DateTime;
         $this->setName($name);
-        $this->songs = new ArrayCollection;
+        $this->setGenre($genre);
+        $this->albums = new ArrayCollection;
     }
 
     /**
      * @return self
      */
-    public function addSong(Song $song)
+    public function addAlbum(Album $album)
     {
-        if (false == $this->songs->contains($song)) {
-            $this->songs->add($song);
-            $song->addAlbum($this);
+        if (false == $this->albums->contains($album)) {
+            $this->albums->add($album);
+            $album->addSong($this);
         }
         return $this;
     }
@@ -72,11 +78,11 @@ class Album
     /**
      * @return self
      */
-    public function removeSong(Song $song)
+    public function removeAlbum(Album $album)
     {
-        if ($this->songs->contains($song)) {
-            $this->songs->removeElement($song);
-            $song->removeAlbum($this);
+        if ($this->albums->contains($album)) {
+            $this->albums->removeElement($album);
+            $album->removeSong($this);
         }
         return $this;
     }
@@ -87,13 +93,20 @@ class Album
      */
     public function setArtist(Artist $artist = null)
     {
-        $previousArtist = $this->artist;
         $this->artist = $artist;
-        if ($artist) {
-            $artist->addAlbum($this);
-        } elseif ($previousArtist) {
-            $previousArtist->removeAlbum($this);
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
+    public function setGenre(Genre $genre)
+    {
+        if ($this->genre) {
+            $this->genre->removeSong($this);
         }
+        $this->genre = $genre;
+        $this->genre->addSong($this);
         return $this;
     }
 
@@ -108,11 +121,27 @@ class Album
     }
 
     /**
+     * @return Collection
+     */
+    public function getAlbums()
+    {
+        return $this->albums;
+    }
+
+    /**
      * @return null|Artist
      */
     public function getArtist()
     {
         return $this->artist;
+    }
+
+    /**
+     * @return Genre
+     */
+    public function getGenre()
+    {
+        return $this->genre;
     }
 
     /**
@@ -129,14 +158,6 @@ class Album
     public function getName()
     {
         return $this->name;
-    }
-
-    /**
-     * @return Collection
-     */
-    public function getSongs()
-    {
-        return $this->songs;
     }
 
     /**

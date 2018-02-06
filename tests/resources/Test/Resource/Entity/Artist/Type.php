@@ -1,10 +1,10 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Test\Entity\Artist;
+namespace IST\DoctrineFirebirdDriver\Test\Resource\Entity\Artist;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use IST\DoctrineFirebirdDriver\Test\Entity\Artist;
+use IST\DoctrineFirebirdDriver\Test\Resource\Entity\Artist;
 
 /**
  * @ORM\Entity
@@ -25,7 +25,7 @@ class Type
     private $name;
 
     /**
-     * @ORM\OneToMany(targetEntity="IST\DoctrineFirebirdDriver\Test\Entity\Artist", mappedBy="type")
+     * @ORM\OneToMany(targetEntity="IST\DoctrineFirebirdDriver\Test\Resource\Entity\Artist", mappedBy="type")
      */
     private $artists;
 
