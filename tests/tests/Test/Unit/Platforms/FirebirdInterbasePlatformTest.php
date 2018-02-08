@@ -538,7 +538,7 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
     {
         $found = $this->_platform->getBooleanTypeDeclarationSQL([]);
         $this->assertInternalType("string", $found);
-        $this->assertSame('NUMERIC(1)', $found);
+        $this->assertSame('BOOLEAN', $found);
     }
 
     public function testGetIntegerTypeDeclarationSQL()
@@ -972,6 +972,12 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
         ];
     }
 
+    public function testReturnsBinaryTypeDeclarationSQL()
+    {
+        $found = $this->_platform->getBinaryTypeDeclarationSQL([]);
+        $this->assertSame("VARCHAR(255)", $found);
+    }
+
     /**
      * @dataProvider dataProvider_testGetBinaryTypeDeclarationSQLSnippet
      */
@@ -1144,5 +1150,34 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
     public function testGetDropDatabaseSQLThrowsException()
     {
         $this->_platform->getDropDatabaseSQL('foobar');
+    }
+
+    /**
+     * @group DBAL-553
+     */
+    public function testHasNativeJsonType()
+    {
+        $this->assertFalse($this->_platform->hasNativeJsonType());
+    }
+
+    /**
+     * @group DBAL-553
+     */
+    public function testReturnsJsonTypeDeclarationSQL()
+    {
+        $column = array(
+            'length'  => 666,
+            'notnull' => true,
+            'type'    => \Doctrine\DBAL\Types\Type::getType('json_array'),
+        );
+        $this->assertSame(
+            $this->_platform->getClobTypeDeclarationSQL($column),
+            $this->_platform->getJsonTypeDeclarationSQL($column)
+        );
+    }
+
+    public function testGetStringLiteralQuoteCharacter()
+    {
+        $this->assertSame("'", $this->_platform->getStringLiteralQuoteCharacter());
     }
 }

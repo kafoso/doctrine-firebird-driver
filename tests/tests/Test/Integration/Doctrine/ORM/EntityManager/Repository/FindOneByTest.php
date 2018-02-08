@@ -8,7 +8,7 @@ class FindOneByTest extends AbstractIntegrationTest
 {
     public function testFindOneByAlbum()
     {
-        $album = static::$entityManager->getRepository(Entity\Album::class)->findOneBy([
+        $album = $this->_entityManager->getRepository(Entity\Album::class)->findOneBy([
             "id" => 1,
         ]);
         $this->assertInstanceOf(Entity\Album::class, $album);

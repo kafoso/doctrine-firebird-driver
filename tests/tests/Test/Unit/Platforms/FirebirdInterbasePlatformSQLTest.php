@@ -283,7 +283,7 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
 
     public function testGeneratesIndexCreationSql()
     {
-        $indexDef = new \Doctrine\DBAL\Schema\Index('my_idx', array('user_name', 'last_login'));
+        $indexDef = new \Doctrine\DBAL\Schema\Index('my_idx', ['user_name', 'last_login']);
         $found = $this->_platform->getCreateIndexSQL($indexDef, 'mytable');
         $expected = 'CREATE INDEX my_idx ON mytable (user_name, last_login)';
         $this->assertSame($expected, $found);
@@ -291,7 +291,7 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
 
     public function testGeneratesUniqueIndexCreationSql()
     {
-        $indexDef = new \Doctrine\DBAL\Schema\Index('index_name', array('test', 'test2'), true);
+        $indexDef = new \Doctrine\DBAL\Schema\Index('index_name', ['test', 'test2'], true);
         $found = $this->_platform->getCreateIndexSQL($indexDef, 'test');
         $expected = 'CREATE UNIQUE INDEX index_name ON test (test, test2)';
         $this->assertEquals($expected, $found);
@@ -316,7 +316,8 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
             ['type']
         );
         $tableDiff->changedColumns['bar'] = new \Doctrine\DBAL\Schema\ColumnDiff(
-            'bar', new \Doctrine\DBAL\Schema\Column(
+            'bar',
+            new \Doctrine\DBAL\Schema\Column(
                 'baz',
                 \Doctrine\DBAL\Types\Type::getType('string'),
                 [
@@ -327,7 +328,8 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
             ['type', 'notnull']
         );
         $tableDiff->changedColumns['metar'] = new \Doctrine\DBAL\Schema\ColumnDiff(
-            'metar', new \Doctrine\DBAL\Schema\Column(
+            'metar',
+            new \Doctrine\DBAL\Schema\Column(
                 'metar',
                 \Doctrine\DBAL\Types\Type::getType('string'),
                 [
@@ -370,9 +372,9 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
     {
         $table1 = new \Doctrine\DBAL\Schema\Table('mytable');
         $table1->addColumn('column_varbinary', 'binary');
-        $table1->addColumn('column_binary', 'binary', array('fixed' => true));
+        $table1->addColumn('column_binary', 'binary', ['fixed' => true]);
         $table2 = new \Doctrine\DBAL\Schema\Table('mytable');
-        $table2->addColumn('column_varbinary', 'binary', array('fixed' => true));
+        $table2->addColumn('column_varbinary', 'binary', ['fixed' => true]);
         $table2->addColumn('column_binary', 'binary');
         $comparator = new \Doctrine\DBAL\Schema\Comparator();
         $found = $this->_platform->getAlterTableSQL($comparator->diffTable($table1, $table2));
@@ -500,15 +502,15 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
 
     public function testGeneratesConstraintCreationSql()
     {
-        $idx = new \Doctrine\DBAL\Schema\Index('constraint_name', array('test'), true, false);
+        $idx = new \Doctrine\DBAL\Schema\Index('constraint_name', ['test'], true, false);
         $found = $this->_platform->getCreateConstraintSQL($idx, 'test');
         $expected = 'ALTER TABLE test ADD CONSTRAINT constraint_name UNIQUE (test)';
         $this->assertEquals($expected, $found);
-        $pk = new \Doctrine\DBAL\Schema\Index('constraint_name', array('test'), true, true);
+        $pk = new \Doctrine\DBAL\Schema\Index('constraint_name', ['test'], true, true);
         $found = $this->_platform->getCreateConstraintSQL($pk, 'test');
         $expected = 'ALTER TABLE test ADD CONSTRAINT constraint_name PRIMARY KEY (test)';
         $this->assertEquals($expected, $found);
-        $fk = new \Doctrine\DBAL\Schema\ForeignKeyConstraint(array('fk_name'), 'foreign', array('id'), 'constraint_fk');
+        $fk = new \Doctrine\DBAL\Schema\ForeignKeyConstraint(['fk_name'], 'foreign', ['id'], 'constraint_fk');
         $found = $this->_platform->getCreateConstraintSQL($fk, 'test');
         $quotedForeignTable = $fk->getQuotedForeignTableName($this->_platform);
         $expected = "ALTER TABLE test ADD CONSTRAINT constraint_fk FOREIGN KEY (fk_name) REFERENCES {$quotedForeignTable} (id)";
@@ -542,7 +544,8 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
             \Doctrine\DBAL\Types\Type::getType('integer')
         );
         $tableDiff->changedColumns['bar'] = new \Doctrine\DBAL\Schema\ColumnDiff(
-            'bar', new \Doctrine\DBAL\Schema\Column(
+            'bar',
+            new \Doctrine\DBAL\Schema\Column(
                 'baz',
                 \Doctrine\DBAL\Types\Type::getType('string'),
                 [
@@ -552,7 +555,8 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
             ['type', 'notnull', 'default']
         );
         $tableDiff->changedColumns['bloo'] = new \Doctrine\DBAL\Schema\ColumnDiff(
-            'bloo', new \Doctrine\DBAL\Schema\Column(
+            'bloo',
+            new \Doctrine\DBAL\Schema\Column(
                 'bloo',
                 \Doctrine\DBAL\Types\Type::getType('boolean'),
                 [
@@ -672,7 +676,8 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
             []
         );
         $tableDiff->changedColumns['changed'] = new \Doctrine\DBAL\Schema\ColumnDiff(
-            'changed', new \Doctrine\DBAL\Schema\Column(
+            'changed',
+            new \Doctrine\DBAL\Schema\Column(
                 'changed2',
                 \Doctrine\DBAL\Types\Type::getType('string'),
                 []
@@ -715,14 +720,16 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
             ['comment' => 'A comment']
         );
         $tableDiff->changedColumns['foo'] = new \Doctrine\DBAL\Schema\ColumnDiff(
-            'foo', new \Doctrine\DBAL\Schema\Column(
+            'foo',
+            new \Doctrine\DBAL\Schema\Column(
                 'foo',
                 \Doctrine\DBAL\Types\Type::getType('string')
             ),
             ['comment']
         );
         $tableDiff->changedColumns['bar'] = new \Doctrine\DBAL\Schema\ColumnDiff(
-            'bar', new \Doctrine\DBAL\Schema\Column(
+            'bar',
+            new \Doctrine\DBAL\Schema\Column(
                 'baz',
                 \Doctrine\DBAL\Types\Type::getType('string'),
                 ['comment' => 'B comment']
@@ -779,7 +786,7 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
 
     public function testGetDefaultValueDeclarationSQLForIntegerTypes()
     {
-        foreach(array('bigint', 'integer', 'smallint') as $type) {
+        foreach(['bigint', 'integer', 'smallint'] as $type) {
             $field = [
                 'type'    => \Doctrine\DBAL\Types\Type::getType($type),
                 'default' => 1
@@ -912,5 +919,411 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
         $index = new \Doctrine\DBAL\Schema\Index('select', ['foo']);
         $found = $this->_platform->getIndexDeclarationSQL('select', $index);
         $this->assertSame('INDEX "select" (foo)', $found);
+    }
+
+    /**
+     * @group DBAL-585
+     */
+    public function testAlterTableChangeQuotedColumn()
+    {
+        $tableDiff = new \Doctrine\DBAL\Schema\TableDiff('mytable');
+        $tableDiff->fromTable = new \Doctrine\DBAL\Schema\Table('mytable');
+        $tableDiff->changedColumns['foo'] = new \Doctrine\DBAL\Schema\ColumnDiff(
+            'select',
+            new \Doctrine\DBAL\Schema\Column(
+                'select',
+                \Doctrine\DBAL\Types\Type::getType('string')
+            ),
+            ['type']
+        );
+        $this->assertContains(
+            $this->_platform->quoteIdentifier('select'),
+            implode(';', $this->_platform->getAlterTableSQL($tableDiff))
+        );
+    }
+
+    /**
+     * @group DBAL-234
+     */
+    public function testAlterTableRenameIndex()
+    {
+        $tableDiff = new \Doctrine\DBAL\Schema\TableDiff('mytable');
+        $tableDiff->fromTable = new \Doctrine\DBAL\Schema\Table('mytable');
+        $tableDiff->fromTable->addColumn('id', 'integer');
+        $tableDiff->fromTable->setPrimaryKey(['id']);
+        $tableDiff->renamedIndexes = [
+            'idx_foo' => new \Doctrine\DBAL\Schema\Index('idx_bar', ['id'])
+        ];
+        $found = $this->_platform->getAlterTableSQL($tableDiff);
+        $this->assertInternalType("array", $found);
+        $this->assertCount(2, $found);
+        $this->assertArrayHasKey(0, $found);
+        $this->assertSame('DROP INDEX idx_foo', $found[0]);
+        $this->assertArrayHasKey(1, $found);
+        $this->assertSame('CREATE INDEX idx_bar ON mytable (id)', $found[1]);
+    }
+
+
+    /**
+     * @group DBAL-234
+     */
+    public function testQuotesAlterTableRenameIndex()
+    {
+        $tableDiff = new \Doctrine\DBAL\Schema\TableDiff('table');
+        $tableDiff->fromTable = new \Doctrine\DBAL\Schema\Table('table');
+        $tableDiff->fromTable->addColumn('id', 'integer');
+        $tableDiff->fromTable->setPrimaryKey(['id']);
+        $tableDiff->renamedIndexes = [
+            'create' => new \Doctrine\DBAL\Schema\Index('select', ['id']),
+            '`foo`'  => new \Doctrine\DBAL\Schema\Index('`bar`', ['id']),
+        ];
+        $found = $this->_platform->getAlterTableSQL($tableDiff);
+        $this->assertInternalType("array", $found);
+        $this->assertCount(4, $found);
+        $this->assertArrayHasKey(0, $found);
+        $this->assertSame('DROP INDEX "create"', $found[0]);
+        $this->assertArrayHasKey(1, $found);
+        $this->assertSame('CREATE INDEX "select" ON "table" (id)', $found[1]);
+        $this->assertArrayHasKey(2, $found);
+        $this->assertSame('DROP INDEX "foo"', $found[2]);
+        $this->assertArrayHasKey(3, $found);
+        $this->assertSame('CREATE INDEX "bar" ON "table" (id)', $found[3]);
+    }
+
+    /**
+     * @group DBAL-835
+     */
+    public function testQuotesAlterTableRenameColumn()
+    {
+        $fromTable = new \Doctrine\DBAL\Schema\Table('mytable');
+        $fromTable->addColumn('unquoted1', 'integer', ['comment' => 'Unquoted 1']);
+        $fromTable->addColumn('unquoted2', 'integer', ['comment' => 'Unquoted 2']);
+        $fromTable->addColumn('unquoted3', 'integer', ['comment' => 'Unquoted 3']);
+        $fromTable->addColumn('create', 'integer', ['comment' => 'Reserved keyword 1']);
+        $fromTable->addColumn('table', 'integer', ['comment' => 'Reserved keyword 2']);
+        $fromTable->addColumn('select', 'integer', ['comment' => 'Reserved keyword 3']);
+        $fromTable->addColumn('`quoted1`', 'integer', ['comment' => 'Quoted 1']);
+        $fromTable->addColumn('`quoted2`', 'integer', ['comment' => 'Quoted 2']);
+        $fromTable->addColumn('`quoted3`', 'integer', ['comment' => 'Quoted 3']);
+        $toTable = new \Doctrine\DBAL\Schema\Table('mytable');
+        $toTable->addColumn('unquoted', 'integer', ['comment' => 'Unquoted 1']); // unquoted -> unquoted
+        $toTable->addColumn('where', 'integer', ['comment' => 'Unquoted 2']); // unquoted -> reserved keyword
+        $toTable->addColumn('`foo`', 'integer', ['comment' => 'Unquoted 3']); // unquoted -> quoted
+        $toTable->addColumn('reserved_keyword', 'integer', ['comment' => 'Reserved keyword 1']); // reserved keyword -> unquoted
+        $toTable->addColumn('from', 'integer', ['comment' => 'Reserved keyword 2']); // reserved keyword -> reserved keyword
+        $toTable->addColumn('`bar`', 'integer', ['comment' => 'Reserved keyword 3']); // reserved keyword -> quoted
+        $toTable->addColumn('quoted', 'integer', ['comment' => 'Quoted 1']); // quoted -> unquoted
+        $toTable->addColumn('and', 'integer', ['comment' => 'Quoted 2']); // quoted -> reserved keyword
+        $toTable->addColumn('`baz`', 'integer', ['comment' => 'Quoted 3']); // quoted -> quoted
+        $comparator = new \Doctrine\DBAL\Schema\Comparator();
+        $found = $this->_platform->getAlterTableSQL($comparator->diffTable($fromTable, $toTable));
+        $this->assertInternalType("array", $found);
+        $this->assertCount(9, $found);
+        $this->assertArrayHasKey(0, $found);
+        $this->assertSame('ALTER TABLE mytable ALTER COLUMN unquoted1 TO unquoted', $found[0]);
+        $this->assertArrayHasKey(1, $found);
+        $this->assertSame('ALTER TABLE mytable ALTER COLUMN unquoted2 TO "where"', $found[1]);
+        $this->assertArrayHasKey(2, $found);
+        $this->assertSame('ALTER TABLE mytable ALTER COLUMN unquoted3 TO "foo"', $found[2]);
+        $this->assertArrayHasKey(3, $found);
+        $this->assertSame('ALTER TABLE mytable ALTER COLUMN "create" TO reserved_keyword', $found[3]);
+        $this->assertArrayHasKey(4, $found);
+        $this->assertSame('ALTER TABLE mytable ALTER COLUMN "table" TO "from"', $found[4]);
+        $this->assertArrayHasKey(5, $found);
+        $this->assertSame('ALTER TABLE mytable ALTER COLUMN "select" TO "bar"', $found[5]);
+        $this->assertArrayHasKey(6, $found);
+        $this->assertSame('ALTER TABLE mytable ALTER COLUMN quoted1 TO quoted', $found[6]);
+        $this->assertArrayHasKey(7, $found);
+        $this->assertSame('ALTER TABLE mytable ALTER COLUMN quoted2 TO "and"', $found[7]);
+        $this->assertArrayHasKey(8, $found);
+        $this->assertSame('ALTER TABLE mytable ALTER COLUMN quoted3 TO "baz"', $found[8]);
+    }
+
+    /**
+     * @group DBAL-807
+     */
+    public function testAlterTableRenameIndexInSchema()
+    {
+        $tableDiff = new \Doctrine\DBAL\Schema\TableDiff('myschema.mytable');
+        $tableDiff->fromTable = new \Doctrine\DBAL\Schema\Table('myschema.mytable');
+        $tableDiff->fromTable->addColumn('id', 'integer');
+        $tableDiff->fromTable->setPrimaryKey(['id']);
+        $tableDiff->renamedIndexes = [
+            'idx_foo' => new \Doctrine\DBAL\Schema\Index('idx_bar', ['id'])
+        ];
+        $found = $this->_platform->getAlterTableSQL($tableDiff);
+        $this->assertInternalType("array", $found);
+        $this->assertCount(2, $found);
+        $this->assertArrayHasKey(0, $found);
+        $this->assertSame('DROP INDEX idx_foo', $found[0]);
+        $this->assertArrayHasKey(1, $found);
+        $this->assertSame('CREATE INDEX idx_bar ON myschema.mytable (id)', $found[1]);
+    }
+
+    /**
+     * @group DBAL-807
+     */
+    public function testQuotesAlterTableRenameIndexInSchema()
+    {
+        $tableDiff = new \Doctrine\DBAL\Schema\TableDiff('`schema`.table');
+        $tableDiff->fromTable = new \Doctrine\DBAL\Schema\Table('`schema`.table');
+        $tableDiff->fromTable->addColumn('id', 'integer');
+        $tableDiff->fromTable->setPrimaryKey(['id']);
+        $tableDiff->renamedIndexes = [
+            'create' => new \Doctrine\DBAL\Schema\Index('select', ['id']),
+            '`foo`'  => new \Doctrine\DBAL\Schema\Index('`bar`', ['id']),
+        ];
+        $found = $this->_platform->getAlterTableSQL($tableDiff);
+        $this->assertInternalType("array", $found);
+        $this->assertCount(4, $found);
+        $this->assertArrayHasKey(0, $found);
+        $this->assertSame('DROP INDEX "create"', $found[0]); // XXX Correct?
+        $this->assertArrayHasKey(1, $found);
+        $this->assertSame('CREATE INDEX "select" ON "schema"."table" (id)', $found[1]); // XXX Correct?
+        $this->assertArrayHasKey(2, $found);
+        $this->assertSame('DROP INDEX "foo"', $found[2]); // XXX Correct?
+        $this->assertArrayHasKey(3, $found);
+        $this->assertSame('CREATE INDEX "bar" ON "schema"."table" (id)', $found[3]); // XXX Correct?
+    }
+
+    public function testGetCommentOnColumnSQLWithoutQuoteCharacter()
+    {
+        $found = $this->_platform->getCommentOnColumnSQL('mytable', 'id', 'This is a comment');
+        $this->assertSame("COMMENT ON COLUMN mytable.id IS 'This is a comment'", $found);
+    }
+
+
+    public function testGetCommentOnColumnSQLWithQuoteCharacter()
+    {
+        $found = $this->_platform->getCommentOnColumnSQL('mytable', 'id', "It's a quote !");
+        $this->assertSame("COMMENT ON COLUMN mytable.id IS 'It''s a quote !'", $found);
+    }
+
+    /**
+     * @group DBAL-1004
+     */
+    public function testGetCommentOnColumnSQL()
+    {
+        $found = $this->_platform->getCommentOnColumnSQL('foo', 'bar', 'comment'); // regular identifiers
+        $this->assertSame('COMMENT ON COLUMN foo.bar IS \'comment\'', $found);
+        $found = $this->_platform->getCommentOnColumnSQL('`Foo`', '`BAR`', 'comment'); // explicitly quoted identifiers
+        $this->assertSame('COMMENT ON COLUMN "Foo"."BAR" IS \'comment\'', $found);
+        $found = $this->_platform->getCommentOnColumnSQL('select', 'from', 'comment'); // reserved keyword identifiers
+        $this->assertSame('COMMENT ON COLUMN "select"."from" IS \'comment\'', $found);
+    }
+
+    public function testQuoteStringLiteral()
+    {
+        $found = $this->_platform->quoteStringLiteral('No quote');
+        $this->assertSame("'No quote'", $found);
+        $found = $this->_platform->quoteStringLiteral('It\'s a quote');
+        $this->assertSame("'It''s a quote'", $found);
+        $found = $this->_platform->quoteStringLiteral('\'');
+        $this->assertSame("''''", $found);
+    }
+
+    /**
+     * @group DBAL-1010
+     */
+    public function testGeneratesAlterTableRenameColumnSQL()
+    {
+        $table = new \Doctrine\DBAL\Schema\Table('foo');
+        $table->addColumn(
+            'bar',
+            'integer',
+            ['notnull' => true, 'default' => 666, 'comment' => 'rename test']
+        );
+        $tableDiff = new \Doctrine\DBAL\Schema\TableDiff('foo');
+        $tableDiff->fromTable = $table;
+        $tableDiff->renamedColumns['bar'] = new \Doctrine\DBAL\Schema\Column(
+            'baz',
+            \Doctrine\DBAL\Types\Type::getType('integer'),
+            ['notnull' => true, 'default' => 666, 'comment' => 'rename test']
+        );
+        $found = $this->_platform->getAlterTableSQL($tableDiff);
+        $this->assertInternalType("array", $found);
+        $this->assertCount(1, $found);
+        $this->assertArrayHasKey(0, $found);
+        $this->assertSame('ALTER TABLE foo ALTER COLUMN bar TO baz', $found[0]);
+    }
+
+    /**
+     * @group DBAL-1016
+     */
+    public function testQuotesTableIdentifiersInAlterTableSQL()
+    {
+        $table = new \Doctrine\DBAL\Schema\Table('"foo"');
+        $table->addColumn('id', 'integer');
+        $table->addColumn('fk', 'integer');
+        $table->addColumn('fk2', 'integer');
+        $table->addColumn('fk3', 'integer');
+        $table->addColumn('bar', 'integer');
+        $table->addColumn('baz', 'integer');
+        $table->addForeignKeyConstraint('fk_table', ['fk'], ['id'], [], 'fk1');
+        $table->addForeignKeyConstraint('fk_table', ['fk2'], ['id'], [], 'fk2');
+        $tableDiff = new \Doctrine\DBAL\Schema\TableDiff('"foo"');
+        $tableDiff->fromTable = $table;
+        $tableDiff->addedColumns['bloo'] = new \Doctrine\DBAL\Schema\Column(
+            'bloo',
+            \Doctrine\DBAL\Types\Type::getType('integer')
+        );
+        $tableDiff->changedColumns['bar'] = new \Doctrine\DBAL\Schema\ColumnDiff(
+            'bar',
+            new \Doctrine\DBAL\Schema\Column(
+                'bar',
+                \Doctrine\DBAL\Types\Type::getType('integer'),
+                ['notnull' => false]
+            ),
+            ['notnull'],
+            $table->getColumn('bar')
+        );
+        $tableDiff->renamedColumns['id'] = new \Doctrine\DBAL\Schema\Column(
+            'war',
+            \Doctrine\DBAL\Types\Type::getType('integer')
+        );
+        $tableDiff->removedColumns['baz'] = new \Doctrine\DBAL\Schema\Column(
+            'baz',
+            \Doctrine\DBAL\Types\Type::getType('integer')
+        );
+        $tableDiff->addedForeignKeys[] = new \Doctrine\DBAL\Schema\ForeignKeyConstraint(
+            ['fk3'],
+            'fk_table',
+            ['id'],
+            'fk_add'
+        );
+        $tableDiff->changedForeignKeys[] = new \Doctrine\DBAL\Schema\ForeignKeyConstraint(
+            ['fk2'],
+            'fk_table2',
+            ['id'],
+            'fk2'
+        );
+        $tableDiff->removedForeignKeys[] = new \Doctrine\DBAL\Schema\ForeignKeyConstraint(
+            ['fk'],
+            'fk_table',
+            ['id'],
+            'fk1'
+        );
+        $found = $this->_platform->getAlterTableSQL($tableDiff);
+        $this->assertInternalType("array", $found);
+        $this->assertCount(8, $found);
+        $this->assertArrayHasKey(0, $found);
+        $this->assertSame('ALTER TABLE "foo" DROP CONSTRAINT fk1', $found[0]);
+        $this->assertArrayHasKey(1, $found);
+        $this->assertSame('ALTER TABLE "foo" DROP CONSTRAINT fk2', $found[1]);
+        $this->assertArrayHasKey(2, $found);
+        $this->assertSame('ALTER TABLE "foo" ADD bloo INTEGER NOT NULL', $found[2]);
+        $this->assertArrayHasKey(3, $found);
+        $this->assertSame('ALTER TABLE "foo" DROP baz', $found[3]);
+        $this->assertArrayHasKey(4, $found);
+        $this->assertSame(
+            'UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = NULL WHERE UPPER(RDB$FIELD_NAME) = UPPER(\'bar\') '
+             . 'AND UPPER(RDB$RELATION_NAME) = UPPER(\'foo\')',
+             $found[4]
+         );
+        $this->assertArrayHasKey(5, $found);
+        $this->assertSame('ALTER TABLE "foo" ALTER COLUMN id TO war', $found[5]);
+        $this->assertArrayHasKey(6, $found);
+        $this->assertSame('ALTER TABLE "foo" ADD CONSTRAINT fk_add FOREIGN KEY (fk3) REFERENCES fk_table (id)', $found[6]);
+        $this->assertArrayHasKey(7, $found);
+        $this->assertSame('ALTER TABLE "foo" ADD CONSTRAINT fk2 FOREIGN KEY (fk2) REFERENCES fk_table2 (id)', $found[7]);
+    }
+
+    /**
+     * @group DBAL-1090
+     */
+    public function testAlterStringToFixedString()
+    {
+        $table = new \Doctrine\DBAL\Schema\Table('mytable');
+        $table->addColumn('name', 'string', ['length' => 2]);
+        $tableDiff = new \Doctrine\DBAL\Schema\TableDiff('mytable');
+        $tableDiff->fromTable = $table;
+        $tableDiff->changedColumns['name'] = new \Doctrine\DBAL\Schema\ColumnDiff(
+            'name', new \Doctrine\DBAL\Schema\Column(
+                'name',
+                \Doctrine\DBAL\Types\Type::getType('string'),
+                ['fixed' => true, 'length' => 2]
+            ),
+            ['fixed']
+        );
+        $found = $this->_platform->getAlterTableSQL($tableDiff);
+        $this->assertInternalType("array", $found);
+        $this->assertCount(1, $found);
+        $this->assertArrayHasKey(0, $found);
+        $this->assertEquals('ALTER TABLE mytable ALTER COLUMN name TYPE CHAR(2)', $found[0]);
+    }
+
+    /**
+     * @group DBAL-1062
+     */
+    public function testGeneratesAlterTableRenameIndexUsedByForeignKeySQL()
+    {
+        $foreignTable = new \Doctrine\DBAL\Schema\Table('foreign_table');
+        $foreignTable->addColumn('id', 'integer');
+        $foreignTable->setPrimaryKey(['id']);
+        $primaryTable = new \Doctrine\DBAL\Schema\Table('mytable');
+        $primaryTable->addColumn('foo', 'integer');
+        $primaryTable->addColumn('bar', 'integer');
+        $primaryTable->addColumn('baz', 'integer');
+        $primaryTable->addIndex(['foo'], 'idx_foo');
+        $primaryTable->addIndex(['bar'], 'idx_bar');
+        $primaryTable->addForeignKeyConstraint($foreignTable, ['foo'], ['id'], [], 'fk_foo');
+        $primaryTable->addForeignKeyConstraint($foreignTable, ['bar'], ['id'], [], 'fk_bar');
+        $tableDiff = new \Doctrine\DBAL\Schema\TableDiff('mytable');
+        $tableDiff->fromTable = $primaryTable;
+        $tableDiff->renamedIndexes['idx_foo'] = new \Doctrine\DBAL\Schema\Index('idx_foo_renamed', ['foo']);
+        $found = $this->_platform->getAlterTableSQL($tableDiff);
+        $this->assertInternalType("array", $found);
+        $this->assertCount(2, $found);
+        $this->assertArrayHasKey(0, $found);
+        $this->assertSame('DROP INDEX idx_foo', $found[0]);
+        $this->assertArrayHasKey(1, $found);
+        $this->assertSame('CREATE INDEX idx_foo_renamed ON mytable (foo)', $found[1]);
+    }
+
+    /**
+     * @group DBAL-1082
+     * @dataProvider getGeneratesDecimalTypeDeclarationSQL
+     */
+    public function testGeneratesDecimalTypeDeclarationSQL(array $column, $expectedSql)
+    {
+        $this->assertSame($expectedSql, $this->_platform->getDecimalTypeDeclarationSQL($column));
+    }
+    /**
+     * @return array
+     */
+    public function getGeneratesDecimalTypeDeclarationSQL()
+    {
+        return [
+            [[], 'NUMERIC(10, 0)'],
+            [['unsigned' => true], 'NUMERIC(10, 0)'],
+            [['unsigned' => false], 'NUMERIC(10, 0)'],
+            [['precision' => 5], 'NUMERIC(5, 0)'],
+            [['scale' => 5], 'NUMERIC(10, 5)'],
+            [['precision' => 8, 'scale' => 2], 'NUMERIC(8, 2)'],
+        ];
+    }
+
+    /**
+     * @group DBAL-1082
+     *
+     * @dataProvider getGeneratesFloatDeclarationSQL
+     */
+    public function testGeneratesFloatDeclarationSQL(array $column, $expectedSql)
+    {
+        $this->assertSame($expectedSql, $this->_platform->getFloatDeclarationSQL($column));
+    }
+    /**
+     * @return array
+     */
+    public function getGeneratesFloatDeclarationSQL()
+    {
+        return [
+            [[], 'DOUBLE PRECISION'],
+            [['unsigned' => true], 'DOUBLE PRECISION'],
+            [['unsigned' => false], 'DOUBLE PRECISION'],
+            [['precision' => 5], 'DOUBLE PRECISION'],
+            [['scale' => 5], 'DOUBLE PRECISION'],
+            [['precision' => 8, 'scale' => 2], 'DOUBLE PRECISION'],
+        ];
     }
 }

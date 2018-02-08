@@ -61,8 +61,7 @@ abstract class AbstractFirebirdInterbaseDriver implements Driver, ExceptionConve
      */
     public function getDatabase(\Doctrine\DBAL\Connection $conn)
     {
-        $params = $conn->getParams();
-        return $params['dbname'];
+        return $this->configuration->getDatabase();
     }
 
     /**

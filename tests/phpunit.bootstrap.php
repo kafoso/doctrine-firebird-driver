@@ -5,9 +5,6 @@ use Doctrine\ORM\Configuration;
 use IST\DoctrineFirebirdDriver\Driver\FirebirdInterbase;
 
 require(__DIR__ . "/../script/bootstrap.php");
-$loader->setPsr4('IST\\DoctrineFirebirdDriver\\Test\\Resource\\', __DIR__ . "/resources/Test/Resource");
-$loader->setPsr4('IST\\DoctrineFirebirdDriver\\Test\\Integration\\', __DIR__ . "/tests/Test/Integration");
-$loader->setPsr4('IST\\DoctrineFirebirdDriver\\Test\\Unit\\', __DIR__ . "/tests/Test/Unit");
 
 $cache = new \Doctrine\Common\Cache\ArrayCache;
 $doctrineConfiguration = new Configuration;

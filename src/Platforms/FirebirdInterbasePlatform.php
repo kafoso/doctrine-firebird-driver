@@ -703,7 +703,7 @@ class FirebirdInterbasePlatform extends AbstractPlatform
      */
     public function getBooleanTypeDeclarationSQL(array $field)
     {
-        return 'NUMERIC(1)';
+        return 'BOOLEAN';
     }
 
     /**
@@ -765,7 +765,7 @@ class FirebirdInterbasePlatform extends AbstractPlatform
             'integer' => 'integer',
             'serial' => 'integer',
             'int64' => 'bigint',
-            'long' => 'integer',
+            'long' => 'bigint',
             'char' => 'string',
             'text' => 'string', // Yes, really. 'char' is internally called text.
             'varchar' => 'string',

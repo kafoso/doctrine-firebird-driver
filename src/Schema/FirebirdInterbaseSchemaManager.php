@@ -7,7 +7,7 @@ class FirebirdInterbaseSchemaManager extends AbstractSchemaManager
 {
     const META_FIELD_TYPE_CHAR = 14;
     const META_FIELD_TYPE_VARCHAR = 37;
-    const META_FIELD_TYPE_CSTRING = 40;
+    const META_FIELD_TYPE_CSTRING = 40; // XXX Does not exist in Firebird 2.5
     const META_FIELD_TYPE_BLOB = 261;
     const META_FIELD_TYPE_DATE = 12;
     const META_FIELD_TYPE_TIME = 13;
@@ -263,5 +263,23 @@ class FirebirdInterbaseSchemaManager extends AbstractSchemaManager
             }
         }
         return parent::_getPortableTableIndexesList($mangledData, $tableName);
+    }
+
+    public static function getFieldTypeIdToColumnTypeMap()
+    {
+        return [
+            self::META_FIELD_TYPE_CHAR => "string",
+            self::META_FIELD_TYPE_VARCHAR => "string",
+            self::META_FIELD_TYPE_CSTRING => "string",
+            self::META_FIELD_TYPE_BLOB => "blob",
+            self::META_FIELD_TYPE_DATE => "date",
+            self::META_FIELD_TYPE_TIME => "time",
+            self::META_FIELD_TYPE_TIMESTAMP => "timestamp",
+            self::META_FIELD_TYPE_DOUBLE => "double",
+            self::META_FIELD_TYPE_FLOAT => "float",
+            self::META_FIELD_TYPE_INT64 => "integer",
+            self::META_FIELD_TYPE_SHORT => "smallint",
+            self::META_FIELD_TYPE_LONG => "bigint",
+        ];
     }
 }

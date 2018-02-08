@@ -20,6 +20,13 @@
             "IST\\DoctrineFirebirdDriver\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "IST\\DoctrineFirebirdDriver\\Test\\Resource\\": "tests/resources/Test/Resource",
+            "IST\\DoctrineFirebirdDriver\\Test\\Integration\\": "tests/tests/Test/Integration",
+            "IST\\DoctrineFirebirdDriver\\Test\\Unit\\": "tests/tests/Test/Unit"
+        }
+    },
     "require": {
         "doctrine/dbal": "^2.5",
         "php": ">=5.6"

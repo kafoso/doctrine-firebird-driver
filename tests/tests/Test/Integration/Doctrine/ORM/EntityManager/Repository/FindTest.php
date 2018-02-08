@@ -1,6 +1,7 @@
 <?php
 namespace IST\DoctrineFirebirdDriver\Test\Integration\Doctrine\ORM\EntityManager\Repository;
 
+use Doctrine\Common\Collections\Collection;
 use IST\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
 use IST\DoctrineFirebirdDriver\Test\Resource\Entity;
 
@@ -8,26 +9,30 @@ class FindTest extends AbstractIntegrationTest
 {
     public function testFindAlbum()
     {
-        $album = static::$entityManager->getRepository(Entity\Album::class)->find(1);
+        $album = $this->_entityManager->getRepository(Entity\Album::class)->find(1);
         $this->assertInstanceOf(Entity\Album::class, $album);
         $this->assertSame(1, $album->getId());
         $this->assertSame("...Baby One More Time", $album->getName());
         $this->assertSame("2017-01-01 15:00:00", $album->getTimeCreated()->format('Y-m-d H:i:s'));
+        $this->assertInstanceOf(Collection::class, $album->getSongs());
         $this->assertSame(2, $album->getSongs()->count());
+        $this->assertInstanceOf(Entity\Song::class, $album->getSongs()->get(0));
         $this->assertSame(1, $album->getSongs()->get(0)->getId());
+        $this->assertInstanceOf(Entity\Song::class, $album->getSongs()->get(1));
         $this->assertSame(2, $album->getSongs()->get(1)->getId());
+        $this->assertInstanceOf(Entity\Artist::class, $album->getArtist());
         $this->assertSame(2, $album->getArtist()->getId());
     }
 
     public function testFindAlbumReturnsNullOnMismatch()
     {
-        $album = static::$entityManager->getRepository(Entity\Album::class)->find(0);
+        $album = $this->_entityManager->getRepository(Entity\Album::class)->find(0);
         $this->assertNull($album);
     }
 
     public function testFindArtist()
     {
-        $artist = static::$entityManager->getRepository(Entity\Artist::class)->find(2);
+        $artist = $this->_entityManager->getRepository(Entity\Artist::class)->find(2);
         $this->assertInstanceOf(Entity\Artist::class, $artist);
         $this->assertSame(2, $artist->getId());
         $this->assertSame(1, $artist->getAlbums()->count());
@@ -37,7 +42,7 @@ class FindTest extends AbstractIntegrationTest
 
     public function testFindArtistType()
     {
-        $type = static::$entityManager->getRepository(Entity\Artist\Type::class)->find(2);
+        $type = $this->_entityManager->getRepository(Entity\Artist\Type::class)->find(2);
         $this->assertInstanceOf(Entity\Artist\Type::class, $type);
         $this->assertSame(2, $type->getId());
         $this->assertSame("Solo", $type->getName());
@@ -46,7 +51,7 @@ class FindTest extends AbstractIntegrationTest
 
     public function testFindGenre()
     {
-        $genre = static::$entityManager->getRepository(Entity\Genre::class)->find(3);
+        $genre = $this->_entityManager->getRepository(Entity\Genre::class)->find(3);
         $this->assertInstanceOf(Entity\Genre::class, $genre);
         $this->assertSame(3, $genre->getId());
         $this->assertSame("Pop", $genre->getName());
@@ -55,7 +60,7 @@ class FindTest extends AbstractIntegrationTest
 
     public function testFindSong()
     {
-        $song = static::$entityManager->getRepository(Entity\Song::class)->find(1);
+        $song = $this->_entityManager->getRepository(Entity\Song::class)->find(1);
         $this->assertInstanceOf(Entity\Song::class, $song);
         $this->assertSame(1, $song->getId());
         $this->assertSame("...Baby One More Time", $song->getName());
