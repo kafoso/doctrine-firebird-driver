@@ -18,6 +18,7 @@ class AlbumTest extends AbstractIntegrationTest
         $this->assertInstanceOf(Entity\Album::class, $album);
         $this->_entityManager->remove($album);
         $this->_entityManager->flush($album);
+        $this->assertNotNull($album);
         $album = $this->_entityManager->getRepository(Entity\Album::class)->find($id);
         $this->assertNull($album);
     }

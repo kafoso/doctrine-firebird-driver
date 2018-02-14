@@ -28,8 +28,10 @@ class AlbumTest extends AbstractIntegrationTest
         $this->_entityManager->persist($album);
         $this->_entityManager->flush($album);
         $id = $album->getId();
-        $album = $this->_entityManager->getRepository(Entity\Album::class)->find($id);
+        $albumFound = $this->_entityManager->getRepository(Entity\Album::class)->find($id);
+        $this->assertSame($album, $albumFound);
         $this->assertInstanceOf(Entity\Artist::class, $album->getArtist());
-        $this->assertInternalType('int', $album->getArtist()->getId());
+        $this->assertSame($artist, $albumFound->getArtist());
+        $this->assertInternalType('int', $albumFound->getArtist()->getId());
     }
 }
