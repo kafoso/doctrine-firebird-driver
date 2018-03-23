@@ -10,6 +10,7 @@ use IST\DoctrineFirebirdDriver\Schema\FirebirdInterbaseSchemaManager;
 abstract class AbstractFirebirdInterbaseDriver implements Driver, ExceptionConverterDriver
 {
     protected $configuration = null;
+    private $_platform = null;
 
     public function __construct(ConfigurationInterface $configuration)
     {
@@ -70,11 +71,13 @@ abstract class AbstractFirebirdInterbaseDriver implements Driver, ExceptionConve
      */
     public function getDatabasePlatform()
     {
-        $platform = new FirebirdInterbasePlatform();
-        if ($this->configuration->getDriverOptions()) {
-            $platform->setPlatformOptions($this->configuration->getDriverOptions());
+        if (null === $this->_platform) {
+            $this->_platform = new FirebirdInterbasePlatform();
+            if ($this->configuration->getDriverOptions()) {
+                $this->_platform->setPlatformOptions($this->configuration->getDriverOptions());
+            }
         }
-        return $platform;
+        return $this->_platform;
     }
 
     /**
