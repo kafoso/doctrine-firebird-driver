@@ -1,9 +1,9 @@
 Doctrine Firebird driver
 ---------------------------
 
-Firebird driver for the Doctrine DBAL (https://github.com/doctrine/dbal).
+Firebird driver for the [Doctrine DBAL](https://github.com/doctrine/dbal).
 
-This library is completely separate (i.e. abstracted away) from the core Doctrine DBAL library.
+This library is completely separate (i.e. abstracted away) from the core Doctrine DBAL library. I.e. it is fully a **plug-in**, however, it requires **configuration in the PHP code**, contra e.g. YAML configuration in [Symfony](https://github.com/symfony/symfony).
 
 # Requirements
 
@@ -30,7 +30,7 @@ Via Github:
 
 To run tests, fix bugs, provide features, etc. the following is required:
 
-- A system capable of running a virtual machine with ubuntu/xenial64.
+- A system capable of running a virtual machine with [ubuntu/xenial64](https://app.vagrantup.com/ubuntu/boxes/xenial64).
 - [Virtualbox](https://www.virtualbox.org/) >= 5.1.0
 - [Vagrant](https://www.vagrantup.com/) >= 2.0.0
 
@@ -64,25 +64,27 @@ Due to the database being created by the PHP bootstrap script on the fly, `root`
 
 ## Authors
 
-- Kasper Søfren (soefritz@gmail.com)<br>
-https://github.com/kafoso
-- Uffe Pedersen ()<br>
+- **Kasper Søfren**<br>
+https://github.com/kafoso<br>
+E-mail: soefritz@gmail.com
+- **Uffe Pedersen**<br>
+https://github.com/upmedia
 
 ## Acknowledgements
 
 ### https://github.com/doctrine/dbal
 
-Fundamental DBAL implementation. The driver and platform logic is based on other implementations in this library, largely [`\Doctrine\DBAL\Driver\PDOOracle\Driver`](https://github.com/doctrine/dbal/blob/v2.5.0/lib/Doctrine/DBAL/Driver/PDOOracle/Driver.php) and [`\Doctrine\DBAL\Platforms\OraclePlatform`](https://github.com/doctrine/dbal/blob/v2.5.0/lib/Doctrine/DBAL/Platforms/OraclePlatform.php), and their respective parent classes.
+Fundamental Doctrine DBAL implementation. The driver and platform logic in this library is based on other implementations in the core library, largely [`\Doctrine\DBAL\Driver\PDOOracle\Driver`](https://github.com/doctrine/dbal/blob/v2.5.0/lib/Doctrine/DBAL/Driver/PDOOracle/Driver.php) and [`\Doctrine\DBAL\Platforms\OraclePlatform`](https://github.com/doctrine/dbal/blob/v2.5.0/lib/Doctrine/DBAL/Platforms/OraclePlatform.php), and their respective parent classes.
 
 ### https://github.com/helicon-os/doctrine-dbal
 
 Whilst a great inspiration for this library - and we very much appreciate the work done by the authors - the library has a few flaws and limitations:
 
-- It contains bugs. E.g. incorrect/insufficient handling of nested transactions.
+- It contains bugs. E.g. incorrect/insufficient handling of nested transactions and save points.
 - It is lacking with respect to test coverage.
 - It appears to no longer be maintained. Possibly entirely discontinued.
 - It is intermingled with the core Doctrine DBAL code, making version management and code adaptation unnecessarily complicated; a nightmare, really. It is forked from https://github.com/doctrine/dbal, although, this is not specifically stated.
-- It is not a Composer package (not on https://packagist.org/).
+- It is not a Composer package (not on [https://packagist.org](https://packagist.org)).
 
 ### https://github.com/ISTDK/doctrine-dbal
 
