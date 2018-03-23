@@ -93,7 +93,10 @@ class Statement implements \IteratorAggregate, StatementInterace
     {
         $this->closeCursor();
         if ($this->ibaseStatementRc && is_resource($this->ibaseStatementRc)) {
-            @ibase_free_query($this->ibaseStatementRc);
+            $success = @ibase_free_query($this->ibaseStatementRc);
+            if (false == $success) {
+                $this->checkLastApiCall();
+            }
             $this->ibaseStatementRc = null;
         }
     }
@@ -254,7 +257,10 @@ class Statement implements \IteratorAggregate, StatementInterace
     public function closeCursor()
     {
         if ($this->ibaseResultRc && is_resource($this->ibaseResultRc)) {
-            @ibase_free_result($this->ibaseResultRc);
+            $success = @ibase_free_result($this->ibaseResultRc);
+            if (false == $success) {
+                $this->checkLastApiCall();
+            }
         }
         $this->ibaseResultRc = null;
     }
@@ -300,7 +306,7 @@ class Statement implements \IteratorAggregate, StatementInterace
                 $this->numFields = @ibase_num_fields($this->ibaseResultRc);
                 $this->ibaseResultRc = null;
             } elseif (is_resource($this->ibaseResultRc)) {
-                $this->affectedRows = ibase_affected_rows($this->connection->getActiveTransactionIbaseRes());
+                $this->affectedRows = @ibase_affected_rows($this->connection->getActiveTransaction());
                 $this->numFields = @ibase_num_fields($this->ibaseResultRc);
             }
             // As the ibase-api does not have an auto-commit-mode, autocommit is simulated by calling the
@@ -554,7 +560,7 @@ class Statement implements \IteratorAggregate, StatementInterace
     protected function doDirectExec()
     {
         $callArgs = $this->queryParamBindings;
-        array_unshift($callArgs, $this->connection->getActiveTransactionIbaseRes(), $this->statement);
+        array_unshift($callArgs, $this->connection->getActiveTransaction(), $this->statement);
         return @call_user_func_array('ibase_query', $callArgs);
     }
 
@@ -566,7 +572,7 @@ class Statement implements \IteratorAggregate, StatementInterace
     {
         if (!$this->ibaseStatementRc || !is_resource($this->ibaseStatementRc)) {
             $this->ibaseStatementRc = @ibase_prepare(
-                $this->connection->getActiveTransactionIbaseRes(),
+                $this->connection->getActiveTransaction(),
                 $this->statement
             );
             if (!$this->ibaseStatementRc || !is_resource($this->ibaseStatementRc))

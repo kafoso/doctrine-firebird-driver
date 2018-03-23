@@ -10,25 +10,27 @@ use IST\DoctrineFirebirdDriver\Driver\ConfigurationInterface;
  */
 class Connection implements ConnectionInterface, ServerInfoAwareConnection
 {
+    const TRANSACTIONS_MAXIMUM_LEVEL = 20;
+
     /**
      * @var Configuration
      */
-    private $configuration;
+    private $_configuration;
 
     /**
      * @var resource (ibase_pconnect or ibase_connect)
      */
-    private $ibaseConnectionRc;
+    private $_ibaseConnectionRc;
 
     /**
-     * @var int Transaction Depth. Should never be > 1
+     * @var int
      */
-    protected $transactionDepth = 0;
+    private $_ibaseTransactionLevel = 0;
 
     /**
-     * @var resource Resource of the active transaction.
+     * @var resource
      */
-    protected $ibaseActiveTransactionRc = null;
+    private $_ibaseActiveTransaction = null;
 
     /**
      * Isolation level used when a transaction is started.
@@ -42,6 +44,7 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
      * @var integer  Number of seconds to wait.
      */
     protected $attrDcTransWait = 5;
+
     /**
      * True if auto-commit is enabled
      * @var boolean
@@ -53,21 +56,52 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
      */
     public function __construct(Configuration $configuration)
     {
-        $this->configuration = $configuration;
-        foreach ($configuration->getDriverOptions() as $k => $v) {
+        $this->_configuration = $configuration;
+        foreach ($this->_configuration->getDriverOptions() as $k => $v) {
             $this->setAttribute($k, $v);
         }
-        $this->getActiveTransactionIbaseRes();
+        $this->connect();
     }
 
     public function __destruct()
     {
-        if ($this->transactionDepth > 0) {
-            // Auto-Rollback explicite transactions
-            $this->rollback();
-        }
         $this->autoCommit();
-        @ibase_close($this->ibaseConnectionRc);
+        $success = @ibase_close($this->_ibaseConnectionRc);
+        if (false == $success) {
+            $this->checkLastApiCall();
+        }
+    }
+
+    public function connect()
+    {
+        if (!$this->_ibaseConnectionRc || !is_resource($this->_ibaseConnectionRc)) {
+            if ($this->_configuration->isPersistent()) {
+                $this->_ibaseConnectionRc = @ibase_pconnect(
+                    $this->_configuration->getFullHostString(),
+                    $this->_configuration->getUsername(),
+                    $this->_configuration->getPassword(),
+                    $this->_configuration->getCharset(),
+                    $this->_configuration->getBuffers(),
+                    $this->_configuration->getDialect()
+                );
+            } else {
+                $this->_ibaseConnectionRc = @ibase_connect(
+                    $this->_configuration->getFullHostString(),
+                    $this->_configuration->getUsername(),
+                    $this->_configuration->getPassword(),
+                    $this->_configuration->getCharset(),
+                    $this->_configuration->getBuffers(),
+                    $this->_configuration->getDialect()
+                );
+            }
+            if (!is_resource($this->_ibaseConnectionRc)) {
+                $this->checkLastApiCall();
+            }
+            if (!is_resource($this->_ibaseConnectionRc)) {
+                throw Exception::fromErrorInfo($this->errorInfo());
+            }
+            $this->_ibaseActiveTransaction = $this->createTransaction(true);
+        }
     }
 
     /**
@@ -113,57 +147,11 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
     }
 
     /**
-     * Returns the current transaction context resource
-     *
-     * Inside an active transaction, the current transaction resource ({@link $activeTransactionIbaseRes}) is returned,
-     * Otherwise the function returns the connection resource ({@link $connectionIbaseRes}).
-     *
-     * If the connection is not open, it gets opened.
-     *
-     * @return resource|null
-     */
-    public function getActiveTransactionIbaseRes()
-    {
-        if (!$this->ibaseConnectionRc || !is_resource($this->ibaseConnectionRc)) {
-            if ($this->configuration->isPersistent()) {
-                $this->ibaseConnectionRc = @ibase_pconnect(
-                    $this->configuration->getFullHostString(),
-                    $this->configuration->getUsername(),
-                    $this->configuration->getPassword(),
-                    $this->configuration->getCharset(),
-                    $this->configuration->getBuffers(),
-                    $this->configuration->getDialect()
-                );
-            } else {
-                $this->ibaseConnectionRc = @ibase_connect(
-                    $this->configuration->getFullHostString(),
-                    $this->configuration->getUsername(),
-                    $this->configuration->getPassword(),
-                    $this->configuration->getCharset(),
-                    $this->configuration->getBuffers(),
-                    $this->configuration->getDialect()
-                );
-            }
-            if (!is_resource($this->ibaseConnectionRc)) {
-                $this->checkLastApiCall();
-            }
-            if (!is_resource($this->ibaseConnectionRc)) {
-                throw Exception::fromErrorInfo($this->errorInfo());
-            }
-            $this->ibaseActiveTransactionRc = $this->internalBeginTransaction(true);
-        }
-        if ($this->ibaseActiveTransactionRc && is_resource($this->ibaseActiveTransactionRc)) {
-            return $this->ibaseActiveTransactionRc;
-        }
-        return null;
-    }
-
-    /**
      * @return ConfigurationInterface
      */
     public function getConfiguration()
     {
-        return $this->configuration;
+        return $this->_configuration;
     }
 
     /**
@@ -171,7 +159,7 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
      */
     public function getInterbaseConnectionResource()
     {
-        return $this->ibaseConnectionRc;
+        return $this->_ibaseConnectionRc;
     }
 
     /**
@@ -179,7 +167,7 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
      */
     public function getServerVersion()
     {
-        return ibase_server_info($this->ibaseConnectionRc, IBASE_SVC_SERVER_VERSION);
+        return ibase_server_info($this->_ibaseConnectionRc, IBASE_SVC_SERVER_VERSION);
     }
 
     /**
@@ -240,7 +228,7 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
         if ($name === null) {
             return false;
         }
-        $sql = 'SELECT GEN_ID(' . $name . ', 0) LAST_VAL FROM RDB$DATABASE';
+        $sql = "SELECT GEN_ID('{$name}', 0) LAST_VAL FROM RDB\$DATABASE";
         $stmt = $this->query($sql);
         $result = $stmt->fetchColumn(0);
         return $result;
@@ -287,9 +275,9 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
      */
     public function beginTransaction()
     {
-        if ($this->transactionDepth < 1) {
-            $this->ibaseActiveTransactionRc = $this->internalBeginTransaction(true);
-            $this->transactionDepth++;
+        if ($this->_ibaseTransactionLevel < 1) {
+            $this->_ibaseActiveTransaction = $this->createTransaction(true);
+            $this->_ibaseTransactionLevel++;
         }
         return true;
     }
@@ -299,46 +287,68 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
      */
     public function commit()
     {
-        if ($this->transactionDepth > 0) {
-            $res = @ibase_commit($this->ibaseActiveTransactionRc);
-            if (!$res) {
+        if ($this->_ibaseTransactionLevel > 0) {
+            if (!$this->_ibaseActiveTransaction || false == is_resource($this->_ibaseActiveTransaction)) {
+                throw new \RuntimeException(sprintf(
+                    "No active transaction. \$this->_ibaseTransactionLevel = %d",
+                    $this->_ibaseTransactionLevel
+                ));
+            }
+            $success = @ibase_commit($this->_ibaseActiveTransaction);
+            if (false == $success) {
                 $this->checkLastApiCall();
             }
-            $this->transactionDepth--;
+            $this->_ibaseTransactionLevel--;
         }
-        $this->ibaseActiveTransactionRc = $this->internalBeginTransaction(true);
+        if (0 == $this->_ibaseTransactionLevel) {
+            $this->_ibaseActiveTransaction = $this->createTransaction(true);
+        }
         return true;
     }
 
     /**
      * Commits the transaction if autocommit is enabled no explicte transaction has been started.
+     * @throws \RuntimeException
      * @return null|bool
      */
     public function autoCommit()
     {
-        if ($this->attrAutoCommit && $this->transactionDepth < 1) {
-            $result = @ibase_commit_ret($this->getActiveTransactionIbaseRes());
-            if (!$result) {
+        if ($this->attrAutoCommit && $this->_ibaseTransactionLevel < 1) {
+            if (!$this->_ibaseActiveTransaction || false == is_resource($this->_ibaseActiveTransaction)) {
+                throw new \RuntimeException(sprintf(
+                    "No active transaction. \$this->_ibaseTransactionLevel = %d",
+                    $this->_ibaseTransactionLevel
+                ));
+            }
+            $success = @ibase_commit_ret($this->getActiveTransaction());
+            if (false == $success) {
                 $this->checkLastApiCall();
             }
-            return $result;
+            return true;
         }
         return null;
     }
 
     /**
-     * {@inheritdoc}non-PHPdoc)
+     * {@inheritdoc)
+     * @throws \RuntimeException
      */
     public function rollBack()
     {
-        if ($this->transactionDepth > 0) {
-            $res = @ibase_rollback($this->ibaseActiveTransactionRc);
-            if (!$res) {
+        if ($this->_ibaseTransactionLevel > 0) {
+            if (!$this->_ibaseActiveTransaction || false == is_resource($this->_ibaseActiveTransaction)) {
+                throw new \RuntimeException(sprintf(
+                    "No active transaction. \$this->_ibaseTransactionLevel = %d",
+                    $this->_ibaseTransactionLevel
+                ));
+            }
+            $success = @ibase_rollback($this->_ibaseActiveTransaction);
+            if (false == $success) {
                 $this->checkLastApiCall();
             }
-            $this->transactionDepth--;
+            $this->_ibaseTransactionLevel--;
         }
-        $this->ibaseActiveTransactionRc = $this->internalBeginTransaction(true);
+        $this->_ibaseActiveTransaction = $this->createTransaction(true);
         return true;
     }
 
@@ -369,18 +379,19 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
     }
 
     /**
-     * @param resource $commitDefaultTransaction
+     * @throws \RuntimeException
+     * @return resource
      */
-    protected function internalBeginTransaction($commitDefaultTransaction = true)
+    public function getActiveTransaction()
     {
-        if ($commitDefaultTransaction) {
-            @ibase_commit($this->ibaseConnectionRc);
+        $this->connect();
+        if (!$this->_ibaseActiveTransaction || false == is_resource($this->_ibaseActiveTransaction)) {
+            throw new \RuntimeException(sprintf(
+                "No active transaction. \$this->_ibaseTransactionLevel = %d",
+                $this->_ibaseTransactionLevel
+            ));
         }
-        $result = @ibase_query($this->ibaseConnectionRc, $this->getStartTransactionSql($this->attrDcTransIsolationLevel));
-        if (!is_resource($result)) {
-            $this->checkLastApiCall();
-        }
-        return $result;
+        return $this->_ibaseActiveTransaction;
     }
 
     /**
@@ -394,5 +405,22 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
         if (isset($lastError['code']) && $lastError['code']) {
             throw Exception::fromErrorInfo($lastError);
         }
+    }
+
+    /**
+     * @param bool $commitDefaultTransaction
+     * @return resource The ibase transaction.
+     */
+    protected function createTransaction($commitDefaultTransaction = true)
+    {
+        if ($commitDefaultTransaction) {
+            @ibase_commit($this->_ibaseConnectionRc);
+        }
+        $sql = $this->getStartTransactionSql($this->attrDcTransIsolationLevel);
+        $result = @ibase_query($this->_ibaseConnectionRc, $sql);
+        if (false == is_resource($result)) {
+            $this->checkLastApiCall();
+        }
+        return $result;
     }
 }
