@@ -57,7 +57,7 @@ Due to the database being created by the PHP bootstrap script on the fly, `root`
 
 1. `vagrant ssh`
 2. `sudo su`
-3. `cd /var/www/tests`
+3. `cd /var/git/kafoso/doctrine-firebird-driver/tests`
 4. `../vendor/phpunit/phpunit/phpunit tests`
 
 # Credits

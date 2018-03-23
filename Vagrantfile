@@ -31,9 +31,9 @@ Vagrant.configure("2") do |config|
   end
 
   if OS.windows? || OS.linux?
-    config.vm.synced_folder "./", "/var/www", create: true, type: "nfs"
+    config.vm.synced_folder "./", "/var/git/kafoso/doctrine-firebird-driver", create: true, type: "nfs"
   else
-    config.vm.synced_folder "./", "/var/www", create: true, owner: "vagrant", group: "www-data", mount_options: ["dmode=775,fmode=664"]
+    config.vm.synced_folder "./", "/var/git/kafoso/doctrine-firebird-driver", create: true, owner: "vagrant", group: "www-data", mount_options: ["dmode=775,fmode=664"]
   end
 
   config.vm.provision "shell", path: "vagrant/scripts/php_setup.sh"
