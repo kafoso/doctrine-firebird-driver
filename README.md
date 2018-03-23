@@ -78,7 +78,7 @@ Fundamental Doctrine DBAL implementation. The driver and platform logic in this 
 
 ### https://github.com/helicon-os/doctrine-dbal
 
-Whilst a great inspiration for this library - and we very much appreciate the work done by the authors - the library has a few flaws and limitations:
+Whilst a great inspiration for this library - and we very much appreciate the work done by the authors - the library has a few flaws and limitations regarding the Interbase Firebird driver logic:
 
 - It contains bugs. E.g. incorrect/insufficient handling of nested transactions and save points.
 - It is lacking with respect to test coverage.
