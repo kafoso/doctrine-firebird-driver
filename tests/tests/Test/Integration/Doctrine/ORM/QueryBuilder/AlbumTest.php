@@ -216,48 +216,44 @@ class AlbumTest extends AbstractIntegrationTest
         $this->assertSame(1, $albums[0]->getId());
     }
 
-    /** XXX
     public function testSelectWithGroupBy()
     {
         $qb = $this->_entityManager->createQueryBuilder();
         $qb
-            ->select('album')
+            ->select('album.id')
             ->from(Entity\Album::class, 'album')
             ->join('album.artist', 'artist')
             ->groupBy('album.id');
-        $expectedDQL = "SELECT album FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album WHERE album.id = :id"; // XXX Fix
+        $expectedDQL = "SELECT album.id FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album INNER JOIN album.artist artist GROUP BY album.id";
         $this->assertSame($expectedDQL, $qb->getQuery()->getDQL());
-        $expectedSQL = "SELECT a0_.id AS ID_0, a0_.timeCreated AS TIMECREATED_1, a0_.name AS NAME_2, a0_.artist_id AS ARTIST_ID_3 FROM ALBUM a0_ WHERE a0_.id = ?"; // XXX Fix
+        $expectedSQL = "SELECT a0_.id AS ID_0 FROM ALBUM a0_ INNER JOIN ARTIST a1_ ON a0_.artist_id = a1_.id GROUP BY a0_.id";
         $this->assertSame($expectedSQL, $qb->getQuery()->getSQL());
-        $albums = $qb->getQuery()->getResult();
-        $this->assertInternalType('array', $albums);
-        $this->assertArrayHasKey(0, $albums);
-        $this->assertInstanceOf(Entity\Album::class, $albums[0]);
-        $this->assertSame(1, $albums[0]->getId());
+        $albumIds = $qb->getQuery()->getResult();
+        $this->assertInternalType('array', $albumIds);
+        $this->assertArrayHasKey(0, $albumIds);
+        $this->assertArrayHasKey('id', $albumIds[0]);
+        $this->assertSame(1, $albumIds[0]['id']);
     }
-    */
 
-    /** XXX
     public function testSelectWithHaving()
     {
         $qb = $this->_entityManager->createQueryBuilder();
         $qb
-            ->select('album')
+            ->select('album.id')
             ->from(Entity\Album::class, 'album')
             ->join('album.artist', 'artist')
             ->groupBy('album.id')
-            ->having('COUNT(artist.id) > 0');
-        $expectedDQL = "SELECT album FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album WHERE album.id = :id"; // XXX Fix
+            ->having('album.id > 1');
+        $expectedDQL = "SELECT album.id FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album INNER JOIN album.artist artist GROUP BY album.id HAVING album.id > 1";
         $this->assertSame($expectedDQL, $qb->getQuery()->getDQL());
-        $expectedSQL = "SELECT a0_.id AS ID_0, a0_.timeCreated AS TIMECREATED_1, a0_.name AS NAME_2, a0_.artist_id AS ARTIST_ID_3 FROM ALBUM a0_ WHERE a0_.id = ?"; // XXX Fix
+        $expectedSQL = "SELECT a0_.id AS ID_0 FROM ALBUM a0_ INNER JOIN ARTIST a1_ ON a0_.artist_id = a1_.id GROUP BY a0_.id HAVING a0_.id > 1";
         $this->assertSame($expectedSQL, $qb->getQuery()->getSQL());
-        $albums = $qb->getQuery()->getResult();
-        $this->assertInternalType('array', $albums);
-        $this->assertArrayHasKey(0, $albums);
-        $this->assertInstanceOf(Entity\Album::class, $albums[0]);
-        $this->assertSame(1, $albums[0]->getId());
+        $albumIds = $qb->getQuery()->getResult();
+        $this->assertInternalType('array', $albumIds);
+        $this->assertArrayHasKey(0, $albumIds);
+        $this->assertArrayHasKey('id', $albumIds[0]);
+        $this->assertSame(2, $albumIds[0]['id']);
     }
-    */
 
     public function testSelectWithOrderBy()
     {
