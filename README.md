@@ -29,7 +29,7 @@ Reasons for not investing time in schema generation include that Firebird does n
 
 # Installation
 
-Via Composer:
+Via Composer ([`kafoso/doctrine-firebird-driver`](https://packagist.org/packages/kafoso/doctrine-firebird-driver)):
 
     composer install kafoso/doctrine-firebird-driver
 
