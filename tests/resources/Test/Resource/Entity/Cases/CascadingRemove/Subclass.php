@@ -1,8 +1,8 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Test\Resource\Entity\Cases\CascadingRemove;
+namespace Kafoso\DoctrineFirebirdDriver\Test\Resource\Entity\Cases\CascadingRemove;
 
 use Doctrine\ORM\Mapping as ORM;
-use IST\DoctrineFirebirdDriver\Test\Resource\Entity\Cases\CascadingRemove;
+use Kafoso\DoctrineFirebirdDriver\Test\Resource\Entity\Cases\CascadingRemove;
 
 /**
  * @ORM\Entity

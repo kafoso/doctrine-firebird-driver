@@ -1,11 +1,11 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Driver;
+namespace Kafoso\DoctrineFirebirdDriver\Driver;
 
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\ExceptionConverterDriver;
 use Doctrine\DBAL\Exception;
-use IST\DoctrineFirebirdDriver\Platforms\FirebirdInterbasePlatform;
-use IST\DoctrineFirebirdDriver\Schema\FirebirdInterbaseSchemaManager;
+use Kafoso\DoctrineFirebirdDriver\Platforms\FirebirdInterbasePlatform;
+use Kafoso\DoctrineFirebirdDriver\Schema\FirebirdInterbaseSchemaManager;
 
 abstract class AbstractFirebirdInterbaseDriver implements Driver, ExceptionConverterDriver
 {

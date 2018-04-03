@@ -1,11 +1,11 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Platforms;
+namespace Kafoso\DoctrineFirebirdDriver\Platforms;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\Identifier;
 use Doctrine\DBAL\Schema\TableDiff;
 use Doctrine\DBAL\Schema\Table;
-use IST\DoctrineFirebirdDriver\Platforms\Keywords\FirebirdInterbaseKeywords;
+use Kafoso\DoctrineFirebirdDriver\Platforms\Keywords\FirebirdInterbaseKeywords;
 
 class FirebirdInterbasePlatform extends AbstractPlatform
 {

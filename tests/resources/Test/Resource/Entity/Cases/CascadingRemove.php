@@ -1,5 +1,5 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Test\Resource\Entity\Cases;
+namespace Kafoso\DoctrineFirebirdDriver\Test\Resource\Entity\Cases;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -16,7 +16,7 @@ class CascadingRemove
     private $id = 1;
 
     /**
-     * @ORM\OneToOne(targetEntity="IST\DoctrineFirebirdDriver\Test\Resource\Entity\Cases\CascadingRemove\Subclass", cascade={"remove"})
+     * @ORM\OneToOne(targetEntity="Kafoso\DoctrineFirebirdDriver\Test\Resource\Entity\Cases\CascadingRemove\Subclass", cascade={"remove"})
      */
     private $subclass;
 

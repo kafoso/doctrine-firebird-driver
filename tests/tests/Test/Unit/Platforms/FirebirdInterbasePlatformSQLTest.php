@@ -1,7 +1,7 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Test\Unit\Platforms;
+namespace Kafoso\DoctrineFirebirdDriver\Test\Unit\Platforms;
 
-use IST\DoctrineFirebirdDriver\Platforms\FirebirdInterbasePlatform;
+use Kafoso\DoctrineFirebirdDriver\Platforms\FirebirdInterbasePlatform;
 
 /**
  * Tests SQL generation. For functional tests, see FirebirdInterbasePlatformTest.
@@ -502,7 +502,7 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
 
     /**
      * @expectedException \Doctrine\DBAL\DBALException
-     * @expectedExceptionMessage Operation 'IST\DoctrineFirebirdDriver\Platforms\FirebirdInterbasePlatform::getAlterTableSQL Cannot rename tables because firebird does not support it
+     * @expectedExceptionMessage Operation 'Kafoso\DoctrineFirebirdDriver\Platforms\FirebirdInterbasePlatform::getAlterTableSQL Cannot rename tables because firebird does not support it
      */
     public function testGeneratesTableAlterationSqlThrowsException()
     {

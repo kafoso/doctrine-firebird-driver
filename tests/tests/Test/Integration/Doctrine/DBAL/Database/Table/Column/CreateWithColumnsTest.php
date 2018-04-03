@@ -1,10 +1,10 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Test\Integration\Doctrine\DBAL\Database\Table\Column;
+namespace Kafoso\DoctrineFirebirdDriver\Test\Integration\Doctrine\DBAL\Database\Table\Column;
 
 use Doctrine\DBAL\Schema\Comparator;
-use IST\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Statement;
-use IST\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
-use IST\DoctrineFirebirdDriver\Schema\FirebirdInterbaseSchemaManager;
+use Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Statement;
+use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
+use Kafoso\DoctrineFirebirdDriver\Schema\FirebirdInterbaseSchemaManager;
 
 class CreateWithColumnsTest extends AbstractIntegrationTest
 {

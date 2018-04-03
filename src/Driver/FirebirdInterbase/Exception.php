@@ -1,5 +1,5 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Driver\FirebirdInterbase;
+namespace Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase;
 
 use Doctrine\DBAL\Driver\AbstractDriverException;
 

@@ -1,9 +1,9 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Driver\FirebirdInterbase;
+namespace Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase;
 
 use Doctrine\DBAL\Driver\Connection as ConnectionInterface;
 use Doctrine\DBAL\Driver\ServerInfoAwareConnection;
-use IST\DoctrineFirebirdDriver\Driver\ConfigurationInterface;
+use Kafoso\DoctrineFirebirdDriver\Driver\ConfigurationInterface;
 
 /**
  * Based on https://github.com/helicon-os/doctrine-dbal

@@ -1,11 +1,11 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Test\Integration;
+namespace Kafoso\DoctrineFirebirdDriver\Test\Integration;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Configuration;
-use IST\DoctrineFirebirdDriver\Driver\FirebirdInterbase;
-use IST\DoctrineFirebirdDriver\Platforms\FirebirdInterbasePlatform;
+use Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase;
+use Kafoso\DoctrineFirebirdDriver\Platforms\FirebirdInterbasePlatform;
 
 abstract class AbstractIntegrationTest extends \PHPUnit_Framework_TestCase
 {

@@ -1,7 +1,7 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Test\Integration\Doctrine\DBAL\Database;
+namespace Kafoso\DoctrineFirebirdDriver\Test\Integration\Doctrine\DBAL\Database;
 
-use IST\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
+use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
 
 class TransactionTest extends AbstractIntegrationTest
 {

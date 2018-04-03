@@ -1,7 +1,7 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Driver;
+namespace Kafoso\DoctrineFirebirdDriver\Driver;
 
 interface ConfigurationInterface
 {
-    
+
 }

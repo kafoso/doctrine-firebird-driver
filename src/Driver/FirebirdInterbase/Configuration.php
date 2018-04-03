@@ -1,7 +1,7 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Driver\FirebirdInterbase;
+namespace Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase;
 
-use IST\DoctrineFirebirdDriver\Driver\ConfigurationInterface;
+use Kafoso\DoctrineFirebirdDriver\Driver\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {

@@ -1,9 +1,9 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Test\Integration\Doctrine\ORM\EntityManager\Repository;
+namespace Kafoso\DoctrineFirebirdDriver\Test\Integration\Doctrine\ORM\EntityManager\Repository;
 
 use Doctrine\Common\Collections\Collection;
-use IST\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
-use IST\DoctrineFirebirdDriver\Test\Resource\Entity;
+use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
+use Kafoso\DoctrineFirebirdDriver\Test\Resource\Entity;
 
 class FindTest extends AbstractIntegrationTest
 {

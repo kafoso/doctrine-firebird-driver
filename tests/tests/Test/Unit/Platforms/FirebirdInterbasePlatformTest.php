@@ -1,8 +1,8 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Test\Unit\Platforms;
+namespace Kafoso\DoctrineFirebirdDriver\Test\Unit\Platforms;
 
-use IST\DoctrineFirebirdDriver\Platforms\FirebirdInterbasePlatform;
-use IST\DoctrineFirebirdDriver\Platforms\Keywords\FirebirdInterbaseKeywords;
+use Kafoso\DoctrineFirebirdDriver\Platforms\FirebirdInterbasePlatform;
+use Kafoso\DoctrineFirebirdDriver\Platforms\Keywords\FirebirdInterbaseKeywords;
 
 /**
  * Tests primarily functional aspects of the platform class. For SQL tests, see FirebirdInterbasePlatformSQLTest.

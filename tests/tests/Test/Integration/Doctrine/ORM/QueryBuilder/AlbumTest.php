@@ -1,8 +1,8 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Test\Integration\Doctrine\ORM\QueryBuilder;
+namespace Kafoso\DoctrineFirebirdDriver\Test\Integration\Doctrine\ORM\QueryBuilder;
 
-use IST\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
-use IST\DoctrineFirebirdDriver\Test\Resource\Entity;
+use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
+use Kafoso\DoctrineFirebirdDriver\Test\Resource\Entity;
 
 /**
  * @runTestsInSeparateProcesses
@@ -15,7 +15,7 @@ class AlbumTest extends AbstractIntegrationTest
         $qb
             ->select('album')
             ->from(Entity\Album::class, 'album');
-        $expectedDQL = "SELECT album FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
+        $expectedDQL = "SELECT album FROM Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
         $this->assertSame($expectedDQL, $qb->getQuery()->getDQL());
         $expectedSQL = "SELECT a0_.id AS ID_0, a0_.timeCreated AS TIMECREATED_1, a0_.name AS NAME_2,";
         $expectedSQL .= " a0_.artist_id AS ARTIST_ID_3 FROM ALBUM a0_";
@@ -33,7 +33,7 @@ class AlbumTest extends AbstractIntegrationTest
         $qb
             ->select('album.id')
             ->from(Entity\Album::class, 'album');
-        $expectedDQL = "SELECT album.id FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
+        $expectedDQL = "SELECT album.id FROM Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
         $this->assertSame($expectedDQL, $qb->getQuery()->getDQL());
         $expectedSQL = "SELECT a0_.id AS ID_0 FROM ALBUM a0_";
         $this->assertSame($expectedSQL, $qb->getQuery()->getSQL());
@@ -52,7 +52,7 @@ class AlbumTest extends AbstractIntegrationTest
             ->select('album')
             ->from(Entity\Album::class, 'album')
             ->join('album.artist', 'artist'); // Inherited join
-        $expectedDQL = "SELECT album FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
+        $expectedDQL = "SELECT album FROM Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
         $expectedDQL .= " INNER JOIN album.artist artist";
         $this->assertSame($expectedDQL, $qb->getQuery()->getDQL());
         $expectedSQL = "SELECT a0_.id AS ID_0, a0_.timeCreated AS TIMECREATED_1, a0_.name AS NAME_2,";
@@ -73,8 +73,8 @@ class AlbumTest extends AbstractIntegrationTest
             ->select('album')
             ->from(Entity\Album::class, 'album')
             ->join(Entity\Artist::class, 'artist', 'WITH', 'artist = album.artist'); // Manual join
-        $expectedDQL = "SELECT album FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
-        $expectedDQL .= " INNER JOIN IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Artist artist WITH artist = album.artist";
+        $expectedDQL = "SELECT album FROM Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
+        $expectedDQL .= " INNER JOIN Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Artist artist WITH artist = album.artist";
         $this->assertSame($expectedDQL, $qb->getQuery()->getDQL());
         $expectedSQL = "SELECT a0_.id AS ID_0, a0_.timeCreated AS TIMECREATED_1, a0_.name AS NAME_2,";
         $expectedSQL .= " a0_.artist_id AS ARTIST_ID_3 FROM ALBUM a0_";
@@ -95,7 +95,7 @@ class AlbumTest extends AbstractIntegrationTest
             ->select('album')
             ->from(Entity\Album::class, 'album')
             ->leftJoin('album.artist', 'artist');
-        $expectedDQL = "SELECT album FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
+        $expectedDQL = "SELECT album FROM Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
         $expectedDQL .= " LEFT JOIN album.artist artist";
         $this->assertSame($expectedDQL, $qb->getQuery()->getDQL());
         $expectedSQL = "SELECT a0_.id AS ID_0, a0_.timeCreated AS TIMECREATED_1, a0_.name AS NAME_2,";
@@ -116,8 +116,8 @@ class AlbumTest extends AbstractIntegrationTest
             ->select('album', 'artist')
             ->from(Entity\Album::class, 'album')
             ->leftJoin(Entity\Artist::class, 'artist', 'WITH', 'artist.id = 0');
-        $expectedDQL = "SELECT album, artist FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
-        $expectedDQL .= " LEFT JOIN IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Artist artist";
+        $expectedDQL = "SELECT album, artist FROM Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
+        $expectedDQL .= " LEFT JOIN Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Artist artist";
         $expectedDQL .= " WITH artist.id = 0";
         $this->assertSame($expectedDQL, $qb->getQuery()->getDQL());
         $expectedSQL = "SELECT a0_.id AS ID_0, a0_.timeCreated AS TIMECREATED_1, a0_.name AS NAME_2, a1_.id AS ID_3,";
@@ -141,7 +141,7 @@ class AlbumTest extends AbstractIntegrationTest
             ->select('album')
             ->from(Entity\Album::class, 'album')
             ->where('album.id > 1');
-        $expectedDQL = "SELECT album FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
+        $expectedDQL = "SELECT album FROM Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
         $expectedDQL .= " WHERE album.id > 1";
         $this->assertSame($expectedDQL, $qb->getQuery()->getDQL());
         $expectedSQL = "SELECT a0_.id AS ID_0, a0_.timeCreated AS TIMECREATED_1, a0_.name AS NAME_2,";
@@ -162,7 +162,7 @@ class AlbumTest extends AbstractIntegrationTest
             ->from(Entity\Album::class, 'album')
             ->where('album.id > 0')
             ->setMaxResults(1);
-        $expectedDQL = "SELECT album FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
+        $expectedDQL = "SELECT album FROM Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
         $expectedDQL .= " WHERE album.id > 0";
         $this->assertSame($expectedDQL, $qb->getQuery()->getDQL());
         $expectedSQL = "SELECT a0_.id AS ID_0, a0_.timeCreated AS TIMECREATED_1, a0_.name AS NAME_2,";
@@ -184,7 +184,7 @@ class AlbumTest extends AbstractIntegrationTest
             ->from(Entity\Album::class, 'album')
             ->where('album.id > 0')
             ->setFirstResult(1);
-        $expectedDQL = "SELECT album FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
+        $expectedDQL = "SELECT album FROM Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
         $expectedDQL .= " WHERE album.id > 0";
         $this->assertSame($expectedDQL, $qb->getQuery()->getDQL());
         $expectedSQL = "SELECT a0_.id AS ID_0, a0_.timeCreated AS TIMECREATED_1, a0_.name AS NAME_2,";
@@ -206,7 +206,7 @@ class AlbumTest extends AbstractIntegrationTest
             ->where('album.id > 0')
             ->setFirstResult(1)
             ->setMaxResults(1);
-        $expectedDQL = "SELECT album FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
+        $expectedDQL = "SELECT album FROM Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
         $expectedDQL .= " WHERE album.id > 0";
         $this->assertSame($expectedDQL, $qb->getQuery()->getDQL());
         $expectedSQL = "SELECT a0_.id AS ID_0, a0_.timeCreated AS TIMECREATED_1, a0_.name AS NAME_2,";
@@ -228,7 +228,7 @@ class AlbumTest extends AbstractIntegrationTest
             ->from(Entity\Album::class, 'album')
             ->where('album.id = :id')
             ->setParameter('id', 1);
-        $expectedDQL = "SELECT album FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
+        $expectedDQL = "SELECT album FROM Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
         $expectedDQL .= " WHERE album.id = :id";
         $this->assertSame($expectedDQL, $qb->getQuery()->getDQL());
         $expectedSQL = "SELECT a0_.id AS ID_0, a0_.timeCreated AS TIMECREATED_1, a0_.name AS NAME_2,";
@@ -249,7 +249,7 @@ class AlbumTest extends AbstractIntegrationTest
             ->from(Entity\Album::class, 'album')
             ->join('album.artist', 'artist')
             ->groupBy('album.id');
-        $expectedDQL = "SELECT album.id FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
+        $expectedDQL = "SELECT album.id FROM Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
         $expectedDQL .= " INNER JOIN album.artist artist GROUP BY album.id";
         $this->assertSame($expectedDQL, $qb->getQuery()->getDQL());
         $expectedSQL = "SELECT a0_.id AS ID_0 FROM ALBUM a0_ INNER JOIN ARTIST a1_ ON a0_.artist_id = a1_.id GROUP BY a0_.id";
@@ -271,7 +271,7 @@ class AlbumTest extends AbstractIntegrationTest
             ->join('album.artist', 'artist')
             ->groupBy('album.id')
             ->having('album.id > 1');
-        $expectedDQL = "SELECT album.id FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
+        $expectedDQL = "SELECT album.id FROM Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
         $expectedDQL .= " INNER JOIN album.artist artist GROUP BY album.id HAVING album.id > 1";
         $this->assertSame($expectedDQL, $qb->getQuery()->getDQL());
         $expectedSQL = "SELECT a0_.id AS ID_0 FROM ALBUM a0_ INNER JOIN ARTIST a1_ ON a0_.artist_id = a1_.id";
@@ -292,7 +292,7 @@ class AlbumTest extends AbstractIntegrationTest
             ->select('album')
             ->from(Entity\Album::class, 'album')
             ->orderBy('album.id', 'DESC');
-        $expectedDQL = "SELECT album FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
+        $expectedDQL = "SELECT album FROM Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
         $expectedDQL .= " ORDER BY album.id DESC";
         $this->assertSame($expectedDQL, $qb->getQuery()->getDQL());
         $expectedSQL = "SELECT a0_.id AS ID_0, a0_.timeCreated AS TIMECREATED_1, a0_.name AS NAME_2,";
@@ -317,9 +317,9 @@ class AlbumTest extends AbstractIntegrationTest
             ->select('album')
             ->from(Entity\Album::class, 'album')
             ->where($qb2->expr()->in('album.artist', $qb1->getDQL()));
-        $expectedDQL = "SELECT album FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
+        $expectedDQL = "SELECT album FROM Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Album album";
         $expectedDQL .= " WHERE album.artist IN(SELECT artist";
-        $expectedDQL .= " FROM IST\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Artist artist WHERE artist.id = 2)";
+        $expectedDQL .= " FROM Kafoso\\DoctrineFirebirdDriver\\Test\\Resource\\Entity\\Artist artist WHERE artist.id = 2)";
         $this->assertSame($expectedDQL, $qb2->getQuery()->getDQL());
         $expectedSQL = "SELECT a0_.id AS ID_0, a0_.timeCreated AS TIMECREATED_1, a0_.name AS NAME_2, a0_.artist_id AS ARTIST_ID_3 FROM ALBUM a0_ WHERE a0_.artist_id IN (SELECT a1_.id FROM ARTIST a1_ WHERE a1_.id = 2)";
         $this->assertSame($expectedSQL, $qb2->getQuery()->getSQL());

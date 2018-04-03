@@ -1,5 +1,5 @@
 <?php
-use IST\DoctrineFirebirdDriver\Test\Resource\Entity;
+use Kafoso\DoctrineFirebirdDriver\Test\Resource\Entity;
 
 require(__DIR__ . "/tests/phpunit.bootstrap.php");
 

@@ -1,5 +1,5 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Test\Resource\Entity;
+namespace Kafoso\DoctrineFirebirdDriver\Test\Resource\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -24,7 +24,7 @@ class Artist
     private $name;
 
     /**
-     * @ORM\ManyToOne(targetEntity="IST\DoctrineFirebirdDriver\Test\Resource\Entity\Artist\Type", inversedBy="artists")
+     * @ORM\ManyToOne(targetEntity="Kafoso\DoctrineFirebirdDriver\Test\Resource\Entity\Artist\Type", inversedBy="artists")
      */
     private $type;
 

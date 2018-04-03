@@ -17,7 +17,7 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace IST\DoctrineFirebirdDriver\Platforms\Keywords;
+namespace Kafoso\DoctrineFirebirdDriver\Platforms\Keywords;
 
 use Doctrine\DBAL\Platforms\Keywords\KeywordList;
 

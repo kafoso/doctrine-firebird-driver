@@ -1,8 +1,8 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Test\Unit\Test\Resource\Entity;
+namespace Kafoso\DoctrineFirebirdDriver\Test\Unit\Test\Resource\Entity;
 
 use Doctrine\Common\Collections\Collection;
-use IST\DoctrineFirebirdDriver\Test\Resource\Entity;
+use Kafoso\DoctrineFirebirdDriver\Test\Resource\Entity;
 
 class SongTest extends \PHPUnit_Framework_TestCase
 {

@@ -1,7 +1,7 @@
 <?php
-namespace IST\DoctrineFirebirdDriver\Test\Unit\Platforms;
+namespace Kafoso\DoctrineFirebirdDriver\Test\Unit\Platforms;
 
-use IST\DoctrineFirebirdDriver\Platforms\FirebirdInterbasePlatform;
+use Kafoso\DoctrineFirebirdDriver\Platforms\FirebirdInterbasePlatform;
 
 abstract class AbstractFirebirdInterbasePlatformTest extends \PHPUnit_Framework_TestCase
 {
