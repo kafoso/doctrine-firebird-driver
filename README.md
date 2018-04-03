@@ -37,6 +37,12 @@ Via Github:
 
     git clone git@github.com:kafoso/doctrine-firebird-driver.git
 
+## Configuration
+
+For example of configuration in PHP, see [`tests/tests/Test/Integration/AbstractIntegrationTest.php`](tests/tests/Test/Integration/AbstractIntegrationTest.php) (in the method `setUp`).
+
+A YAML configuration example is not provided, nor is YAML supported at the current stage.
+
 # Tests
 
 ## Test/development requirements
