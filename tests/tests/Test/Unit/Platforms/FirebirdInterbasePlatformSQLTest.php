@@ -200,7 +200,6 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
      */
     public function dataProvider_testGeneratesAdvancedForeignKeyOptionsSQL()
     {
-        // XXX Ensure this is correct cf. actual SQL
         return [
             ['', []],
             [' ON UPDATE CASCADE', ['onUpdate' => 'CASCADE']],
@@ -366,22 +365,6 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
         $this->assertSame('CHAR(8190)', $this->_platform->getBinaryTypeDeclarationSQL(['fixed' => true, 'length' => 8190]));
         $this->assertSame('BLOB', $this->_platform->getBinaryTypeDeclarationSQL(['fixed' => true, 'length' => 8191]));
     }
-
-    /** XXX Fix me https://github.com/ISTDK/doctrine-dbal/blob/master/tests/Doctrine/Tests/DBAL/Platforms/OraclePlatformTest.php#L422
-    public function testDoesNotPropagateUnnecessaryTableAlterationOnBinaryType()
-    {
-        $table1 = new \Doctrine\DBAL\Schema\Table('mytable');
-        $table1->addColumn('column_varbinary', 'binary');
-        $table1->addColumn('column_binary', 'binary', ['fixed' => true]);
-        $table2 = new \Doctrine\DBAL\Schema\Table('mytable');
-        $table2->addColumn('column_varbinary', 'binary', ['fixed' => true]);
-        $table2->addColumn('column_binary', 'binary');
-        $comparator = new \Doctrine\DBAL\Schema\Comparator();
-        $found = $this->_platform->getAlterTableSQL($comparator->diffTable($table1, $table2));
-        echo "<pre>";var_dump("kafoso [] ".__FILE__."::".__LINE__, $found);die("</pre>");
-        $this->assertEmpty($found);
-    }
-    */
 
     public function testGetCreateAutoincrementSql()
     {
@@ -1077,13 +1060,13 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
         $this->assertInternalType("array", $found);
         $this->assertCount(4, $found);
         $this->assertArrayHasKey(0, $found);
-        $this->assertSame('DROP INDEX "create"', $found[0]); // XXX Correct?
+        $this->assertSame('DROP INDEX "create"', $found[0]);
         $this->assertArrayHasKey(1, $found);
-        $this->assertSame('CREATE INDEX "select" ON "schema"."table" (id)', $found[1]); // XXX Correct?
+        $this->assertSame('CREATE INDEX "select" ON "schema"."table" (id)', $found[1]);
         $this->assertArrayHasKey(2, $found);
-        $this->assertSame('DROP INDEX "foo"', $found[2]); // XXX Correct?
+        $this->assertSame('DROP INDEX "foo"', $found[2]);
         $this->assertArrayHasKey(3, $found);
-        $this->assertSame('CREATE INDEX "bar" ON "schema"."table" (id)', $found[3]); // XXX Correct?
+        $this->assertSame('CREATE INDEX "bar" ON "schema"."table" (id)', $found[3]);
     }
 
     public function testGetCommentOnColumnSQLWithoutQuoteCharacter()
