@@ -20,7 +20,7 @@ See [LICENSE](LICENSE) file. Basically: Use this library at your own risk.
 
 ## Limitations of Schema Manager
 
-This library does **<span style="color:#ff4444;">not</span> fully support generation through the Schema Manager**, i.e.:
+This library does **_not_ fully support generation through the Schema Manager**, i.e.:
 
 1. Generation of database tables, views, etc. from entities.
 2. Generation of entities from database tables, views, etc.
