@@ -14,6 +14,19 @@ To utilize this library in your application code, the following is required:
 - PHP >= 5.6.0
 - [doctrine/dbal: 2.5.\*](https://packagist.org/packages/doctrine/dbal#v2.5.0)
 
+# License & Disclaimer
+
+See [LICENSE](LICENSE) file. Basically: Use this library at your own risk.
+
+## Limitations of Schema Manager
+
+This library does **<span style="color:#ff4444;">not</span> fully support generation through the Schema Manager**, i.e.:
+
+1. Generation of database tables, views, etc. from entities.
+2. Generation of entities from database tables, views, etc.
+
+Reasons for not investing time in schema generation include that Firebird does not allow renaming of tables, which in turn makes automated schema updates annoying and over-complicated. Better results are probably achieved by writing manual migrations.
+
 # Installation
 
 Via Composer:
