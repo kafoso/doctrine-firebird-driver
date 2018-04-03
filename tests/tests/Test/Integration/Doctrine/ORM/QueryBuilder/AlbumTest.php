@@ -4,6 +4,9 @@ namespace IST\DoctrineFirebirdDriver\Test\Integration\Doctrine\ORM\QueryBuilder;
 use IST\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
 use IST\DoctrineFirebirdDriver\Test\Resource\Entity;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class AlbumTest extends AbstractIntegrationTest
 {
     public function testSelect()
