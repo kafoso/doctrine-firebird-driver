@@ -1,6 +1,7 @@
 {
     "name": "kafoso/doctrine-firebird-driver",
     "type": "library",
+    "license": "MIT",
     "authors": [
         {
             "name": "Kasper Søfren",
