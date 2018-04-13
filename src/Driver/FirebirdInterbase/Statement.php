@@ -362,10 +362,8 @@ class Statement implements \IteratorAggregate, StatementInterace
                 return $this->internalFetchClassOrObject(isset($optArg1) ? $optArg1 : $this->defaultFetchInto, []);
             case \PDO::FETCH_ASSOC:
                 return $this->internalFetchAssoc();
-                break;
             case \PDO::FETCH_NUM:
                 return $this->internalFetchNum();
-                break;
             case \PDO::FETCH_BOTH:
                 return $this->internalFetchBoth();
             default:
@@ -430,9 +428,8 @@ class Statement implements \IteratorAggregate, StatementInterace
         $rowData = $this->internalFetchNum();
         if (is_array($rowData)) {
             return (isset($rowData[$columnIndex]) ? $rowData[$columnIndex] : NULL);
-        } else {
-            return FALSE;
         }
+        return false;
     }
 
     /**
@@ -508,9 +505,8 @@ class Statement implements \IteratorAggregate, StatementInterace
         $rowData = $this->internalFetchAssoc();
         if (is_array($rowData)) {
             return $this->createObjectAndSetPropertiesCaseInsenstive($aClassOrObject, is_array($constructorArguments) ? $constructorArguments : [], $rowData);
-        } else {
-            return $rowData;
         }
+        return $rowData;
     }
 
     /**
@@ -533,7 +529,7 @@ class Statement implements \IteratorAggregate, StatementInterace
 
     /**
      * Fetches the next record into an associative array
-     * @return array
+     * @return array|bool
      */
     protected function internalFetchAssoc()
     {
@@ -542,7 +538,7 @@ class Statement implements \IteratorAggregate, StatementInterace
 
     /**
      * Fetches the next record into an array using column name and index as key
-     * @return array|boolean
+     * @return array|bool
      */
     protected function internalFetchBoth()
     {
@@ -555,7 +551,7 @@ class Statement implements \IteratorAggregate, StatementInterace
 
     /**
      * Prepares the statement for further use and executes it
-     * @result resource|boolean
+     * @return resource|bool
      */
     protected function doDirectExec()
     {
@@ -566,7 +562,7 @@ class Statement implements \IteratorAggregate, StatementInterace
 
     /**
      * Prepares the statement for further use and executes it
-     * @result resource|boolean
+     * @return resource|bool
      */
     protected function doExecPrepared()
     {

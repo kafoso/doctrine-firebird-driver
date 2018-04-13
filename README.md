@@ -3,7 +3,7 @@ Doctrine Firebird driver
 
 Firebird driver for the [Doctrine DBAL](https://github.com/doctrine/dbal).
 
-This library is completely separate (i.e. abstracted away) from the core Doctrine DBAL library. I.e. it is fully a **plug-in**, however, it requires **configuration in the PHP code**, contra e.g. YAML configuration in [Symfony](https://github.com/symfony/symfony).
+This library is completely separate (i.e. abstracted away) from the core Doctrine DBAL library. I.e. it is fully a **plug-in**.
 
 # Requirements
 
@@ -39,9 +39,32 @@ Via Github:
 
 ## Configuration
 
+### Manual configuration
+
 For example of configuration in PHP, see [`tests/tests/Test/Integration/AbstractIntegrationTest.php`](tests/tests/Test/Integration/AbstractIntegrationTest.php) (in the method `setUp`).
 
-A YAML configuration example is not provided, nor is YAML supported at the current stage.
+Additional help may be found at: https://www.doctrine-project.org/projects/doctrine-orm/en/2.5/reference/advanced-configuration.html
+
+### Symfony configuration (YAML)
+
+This driver may be used like any other Doctrine DBAL driver in [Symfony](https://symfony.com/). However, the `driver_class` option must be specified instead of simply `driver`. This is due to the driver not being part of the [core Doctrine DBAL library](https://github.com/doctrine/dbal).
+
+Sample YAML configuration:
+
+```
+doctrine:
+    dbal:
+        default_connection: default
+        connections:
+            default:
+                driver_class:   Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Driver
+                host:           "%database_host%"
+                port:           "%database_port%"
+                dbname:         "%database_name%"
+                user:           "%database_user%"
+                password:       "%database_password%"
+                charset:        "UTF-8"
+```
 
 # Tests
 

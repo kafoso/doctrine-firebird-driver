@@ -22,21 +22,25 @@ abstract class AbstractIntegrationTest extends \PHPUnit_Framework_TestCase
         $doctrineConfiguration->setProxyNamespace('DoctrineFirebirdDriver\Proxies');
         $doctrineConfiguration->setAutoGenerateProxyClasses(true);
 
-        $configuration = new FirebirdInterbase\Configuration(
-            'localhost',
-            null,
-            '/var/lib/firebird/2.5/data/music_library.fdb',
-            'SYSDBA',
-            '88fb9f307125cc397f70e59c749715e1',
-            'UTF-8'
+        $dbname = '/var/lib/firebird/2.5/data/music_library.fdb';
+        $username = 'SYSDBA';
+        $password = '88fb9f307125cc397f70e59c749715e1';
+        $doctrineConnection = new Connection(
+            [
+                'host' => 'localhost',
+                'dbname' => $dbname,
+                'user' => $username,
+                'password' => $password,
+                'charset' => 'UTF-8',
+            ],
+            new FirebirdInterbase\Driver,
+            $doctrineConfiguration
         );
-        $driver = new FirebirdInterbase\Driver($configuration);
-        $doctrineConnection = new Connection([], $driver, $doctrineConfiguration);
         $doctrineConnection->setNestTransactionsWithSavepoints(true);
         $this->_entityManager = EntityManager::create($doctrineConnection, $doctrineConfiguration);
 
-        if (file_exists($configuration->getDatabase())) {
-            unlink($configuration->getDatabase());
+        if (file_exists($dbname)) {
+            unlink($dbname); // Don't do this outside tests
         }
 
         $cmd = sprintf(
@@ -45,14 +49,14 @@ abstract class AbstractIntegrationTest extends \PHPUnit_Framework_TestCase
         );
         exec($cmd);
 
-        chmod($configuration->getDatabase(), 0777);
+        chmod($dbname, 0777);
 
         $cmd = sprintf(
             "isql-fb %s -input %s -password %s -user %s",
-            escapeshellarg($configuration->getDatabase()),
+            escapeshellarg($dbname),
             escapeshellarg(ROOT_PATH . "/tests/resources/database_setup.sql"),
-            escapeshellarg($configuration->getPassword()),
-            escapeshellarg($configuration->getUsername())
+            escapeshellarg($password),
+            escapeshellarg($username)
         );
         exec($cmd);
 

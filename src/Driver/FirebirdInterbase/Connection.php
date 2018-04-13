@@ -3,24 +3,46 @@ namespace Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase;
 
 use Doctrine\DBAL\Driver\Connection as ConnectionInterface;
 use Doctrine\DBAL\Driver\ServerInfoAwareConnection;
-use Kafoso\DoctrineFirebirdDriver\Driver\ConfigurationInterface;
+use Kafoso\DoctrineFirebirdDriver\Driver\AbstractFirebirdInterbaseDriver;
 
 /**
  * Based on https://github.com/helicon-os/doctrine-dbal
  */
 class Connection implements ConnectionInterface, ServerInfoAwareConnection
 {
-    const TRANSACTIONS_MAXIMUM_LEVEL = 20;
+    const DEFAULT_CHARSET = 'UTF-8';
+    const DEFAULT_BUFFERS = 0;
+    const DEFAULT_IS_PERSISTENT = true;
 
     /**
-     * @var Configuration
+     * @var null|string
      */
-    private $_configuration;
+    protected $connectString = null;
+
+    /**
+     * @var bool
+     */
+    protected $isPersistent = true;
+
+    /**
+     * @var string
+     */
+    protected $charset = 'UTF-8';
+
+    /**
+     * @var int
+     */
+    protected $buffers = 0;
+
+    /**
+     * @var string
+     */
+    protected $dialect = 0;
 
     /**
      * @var resource (ibase_pconnect or ibase_connect)
      */
-    private $_ibaseConnectionRc;
+    private $_ibaseConnectionRc = null;
 
     /**
      * @var int
@@ -52,19 +74,42 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
     protected $attrAutoCommit = true;
 
     /**
-     * @throws Exception
+     * @param string $params
+     * @param null|string $username
+     * @param null|string $password
+     * @param null|array $driverOptions
+     * @throws \RuntimeException
      */
-    public function __construct(Configuration $configuration)
+    public function __construct(array $params, $username, $password, array $driverOptions = array())
     {
-        $this->_configuration = $configuration;
-        foreach ($this->_configuration->getDriverOptions() as $k => $v) {
-            $this->setAttribute($k, $v);
+        $this->connectString = self::generateConnectString($params);
+        $this->isPersistent = self::DEFAULT_IS_PERSISTENT;
+        if (isset($params['isPersistent']) && is_bool($params['isPersistent'])) {
+            $this->isPersistent = $params['isPersistent'];
         }
-        $this->connect();
+        $this->charset = self::DEFAULT_CHARSET;
+        if (isset($params['charset']) && is_string($params['charset']) && $params['charset']) {
+            $this->charset = $params['charset'];
+        }
+        $this->buffers = self::DEFAULT_BUFFERS;
+        if (isset($params['buffers']) && is_int($params['buffers']) && $params['buffers'] >= 0) {
+            $this->buffers = $params['buffers'];
+        }
+        $this->username = $username;
+        $this->password = $password;
+        if ($driverOptions) {
+            foreach ($driverOptions as $k => $v) {
+                $this->setAttribute($k, $v);
+            }
+        }
+        $this->getActiveTransaction(); // Connects to the database
     }
 
     public function __destruct()
     {
+        if ($this->_ibaseTransactionLevel > 0) {
+            $this->rollback(); // Auto-rollback explicite transactions
+        }
         $this->autoCommit();
         $success = @ibase_close($this->_ibaseConnectionRc);
         if (false == $success) {
@@ -72,44 +117,12 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
         }
     }
 
-    public function connect()
-    {
-        if (!$this->_ibaseConnectionRc || !is_resource($this->_ibaseConnectionRc)) {
-            if ($this->_configuration->isPersistent()) {
-                $this->_ibaseConnectionRc = @ibase_pconnect(
-                    $this->_configuration->getFullHostString(),
-                    $this->_configuration->getUsername(),
-                    $this->_configuration->getPassword(),
-                    $this->_configuration->getCharset(),
-                    $this->_configuration->getBuffers(),
-                    $this->_configuration->getDialect()
-                );
-            } else {
-                $this->_ibaseConnectionRc = @ibase_connect(
-                    $this->_configuration->getFullHostString(),
-                    $this->_configuration->getUsername(),
-                    $this->_configuration->getPassword(),
-                    $this->_configuration->getCharset(),
-                    $this->_configuration->getBuffers(),
-                    $this->_configuration->getDialect()
-                );
-            }
-            if (!is_resource($this->_ibaseConnectionRc)) {
-                $this->checkLastApiCall();
-            }
-            if (!is_resource($this->_ibaseConnectionRc)) {
-                throw Exception::fromErrorInfo($this->errorInfo());
-            }
-            $this->_ibaseActiveTransaction = $this->createTransaction(true);
-        }
-    }
-
     /**
      * {@inheritDoc}
      *
      * Additionally to the standard driver attributes, the attribute
-     * {@link Configuration::ATTR_DOCTRINE_DEFAULT_TRANS_ISOLATION_LEVEL} can be used to control
-     * the isolation level used for transactions
+     * {@link AbstractFirebirdInterbaseDriver::ATTR_DOCTRINE_DEFAULT_TRANS_ISOLATION_LEVEL} can be used to control the
+     * isolation level used for transactions.
      *
      * @param string $attribute
      * @param mixed $value
@@ -117,10 +130,10 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
     public function setAttribute($attribute, $value)
     {
         switch ($attribute) {
-            case Configuration::ATTR_DOCTRINE_DEFAULT_TRANS_ISOLATION_LEVEL:
+            case AbstractFirebirdInterbaseDriver::ATTR_DOCTRINE_DEFAULT_TRANS_ISOLATION_LEVEL:
                 $this->attrDcTransIsolationLevel = $value;
                 break;
-            case Configuration::ATTR_DOCTRINE_DEFAULT_TRANS_WAIT:
+            case AbstractFirebirdInterbaseDriver::ATTR_DOCTRINE_DEFAULT_TRANS_WAIT:
                 $this->attrDcTransWait = $value;
                 break;
             case \PDO::ATTR_AUTOCOMMIT:
@@ -137,21 +150,13 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
     public function getAttribute($attribute)
     {
         switch ($attribute) {
-            case Configuration::ATTR_DOCTRINE_DEFAULT_TRANS_ISOLATION_LEVEL:
+            case AbstractFirebirdInterbaseDriver::ATTR_DOCTRINE_DEFAULT_TRANS_ISOLATION_LEVEL:
                 return $this->attrDcTransIsolationLevel;
-            case Configuration::ATTR_DOCTRINE_DEFAULT_TRANS_WAIT:
+            case AbstractFirebirdInterbaseDriver::ATTR_DOCTRINE_DEFAULT_TRANS_WAIT:
                 return $this->attrDcTransWait;
             case \PDO::ATTR_AUTOCOMMIT:
                 return $this->attrAutoCommit;
         }
-    }
-
-    /**
-     * @return ConfigurationInterface
-     */
-    public function getConfiguration()
-    {
-        return $this->_configuration;
     }
 
     /**
@@ -384,7 +389,38 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
      */
     public function getActiveTransaction()
     {
-        $this->connect();
+        if (!$this->_ibaseConnectionRc || false == is_resource($this->_ibaseConnectionRc)) {
+            try {
+                if ($this->isPersistent) {
+                    $this->_ibaseConnectionRc = @ibase_pconnect( // Notice the "p"
+                        $this->connectString,
+                        $this->username,
+                        $this->password,
+                        $this->charset,
+                        $this->buffers,
+                        $this->dialect
+                    );
+                } else {
+                    $this->_ibaseConnectionRc = @ibase_connect(
+                        $this->connectString,
+                        $this->username,
+                        $this->password,
+                        $this->charset,
+                        $this->buffers,
+                        $this->dialect
+                    );
+                }
+                if (!is_resource($this->_ibaseConnectionRc)) {
+                    $this->checkLastApiCall();
+                }
+                if (!is_resource($this->_ibaseConnectionRc)) {
+                    throw Exception::fromErrorInfo($this->errorInfo());
+                }
+                $this->_ibaseActiveTransaction = $this->createTransaction(true);
+            } catch (\Exception $e) {
+                throw new \RuntimeException("Failed to connection to database", 0, $e);
+            }
+        }
         if (!$this->_ibaseActiveTransaction || false == is_resource($this->_ibaseActiveTransaction)) {
             throw new \RuntimeException(sprintf(
                 "No active transaction. \$this->_ibaseTransactionLevel = %d",
@@ -422,5 +458,25 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
             $this->checkLastApiCall();
         }
         return $result;
+    }
+
+    /**
+     * @throws \RuntimeException
+     * @return string
+     */
+    public static function generateConnectString(array $params)
+    {
+        if (isset($params['host'], $params['dbname']) && $params['host'] && $params['dbname']) {
+            $str = $params['host'];
+            if (isset($params['port'])) {
+                if (!$params['port']) {
+                    throw new \RuntimeException("Invalid \"port\" in argument \$params");
+                }
+                $str .= '/' . $params['port'];
+            }
+            $str .= ':' . $params['dbname'];
+            return $str;
+        }
+        throw new \RuntimeException("Argument \$params must contain non-empty \"host\" and \"dbname\"");
     }
 }

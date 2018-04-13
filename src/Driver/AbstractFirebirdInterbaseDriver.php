@@ -9,13 +9,11 @@ use Kafoso\DoctrineFirebirdDriver\Schema\FirebirdInterbaseSchemaManager;
 
 abstract class AbstractFirebirdInterbaseDriver implements Driver, ExceptionConverterDriver
 {
-    protected $configuration = null;
-    private $_platform = null;
+    const ATTR_DOCTRINE_DEFAULT_TRANS_ISOLATION_LEVEL = 'doctrineTransactionIsolationLevel';
 
-    public function __construct(ConfigurationInterface $configuration)
-    {
-        $this->configuration = $configuration;
-    }
+    const ATTR_DOCTRINE_DEFAULT_TRANS_WAIT = 'doctrineTransactionWait';
+
+    private $_driverOptions = [];
 
     /**
      * {@inheritdoc}
@@ -58,11 +56,39 @@ abstract class AbstractFirebirdInterbaseDriver implements Driver, ExceptionConve
     }
 
     /**
+     * @param string $key
+     * @param mixed $value
+     * @return self
+     */
+    public function setDriverOption($key, $value)
+    {
+        if (trim($key) && in_array($key, self::getDriverOptionKeys())) {
+            $this->_driverOptions[$key] = $value;
+        }
+        return $this;
+    }
+
+    /**
+     * @param array $options
+     * @return self
+     */
+    public function setDriverOptions($options)
+    {
+        if (is_array($options)) {
+            foreach ($options as $k => $v) {
+                $this->setDriverOption($k, $v);
+            }
+        }
+        return $this;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getDatabase(\Doctrine\DBAL\Connection $conn)
     {
-        return $this->configuration->getDatabase();
+        $params = $conn->getParams();
+        return $params['dbname'];
     }
 
     /**
@@ -71,13 +97,27 @@ abstract class AbstractFirebirdInterbaseDriver implements Driver, ExceptionConve
      */
     public function getDatabasePlatform()
     {
-        if (null === $this->_platform) {
-            $this->_platform = new FirebirdInterbasePlatform();
-            if ($this->configuration->getDriverOptions()) {
-                $this->_platform->setPlatformOptions($this->configuration->getDriverOptions());
-            }
+        return new FirebirdInterbasePlatform();
+    }
+
+    /**
+     * @param string $key
+     * @return mixed
+     */
+    public function getDriverOption($key)
+    {
+        if (trim($key) && in_array($key, self::getDriverOptionKeys())) {
+            return $this->_driverOptions[$key];
         }
-        return $this->_platform;
+        return null;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDriverOptions()
+    {
+        return $this->_driverOptions;
     }
 
     /**
@@ -87,5 +127,17 @@ abstract class AbstractFirebirdInterbaseDriver implements Driver, ExceptionConve
     public function getSchemaManager(\Doctrine\DBAL\Connection $conn)
     {
         return new FirebirdInterbaseSchemaManager($conn);
+    }
+
+    /**
+     * @return array
+     */
+    public static function getDriverOptionKeys()
+    {
+        return [
+            self::ATTR_DOCTRINE_DEFAULT_TRANS_ISOLATION_LEVEL,
+            self::ATTR_DOCTRINE_DEFAULT_TRANS_WAIT,
+            \PDO::ATTR_AUTOCOMMIT,
+        ];
     }
 }

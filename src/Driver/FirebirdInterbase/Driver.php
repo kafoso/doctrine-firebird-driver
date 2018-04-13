@@ -7,16 +7,18 @@ use Kafoso\DoctrineFirebirdDriver\Driver\AbstractFirebirdInterbaseDriver;
 class Driver extends AbstractFirebirdInterbaseDriver
 {
     /**
-     * @param array $params                     N/A.
-     * @param ?string $username                 N/A.
-     * @param ?string $password                 N/A.
-     * @param array $driverOptions              N/A.
      * {@inheritdoc}
      */
     public function connect(array $params, $username = null, $password = null, array $driverOptions = array())
     {
+        $this->setDriverOptions($driverOptions);
         try {
-            return new Connection($this->configuration);
+            return new Connection(
+                $params,
+                $username,
+                $password,
+                $this->getDriverOptions() // Sanitized
+            );
         } catch (Exception $e) {
             throw DBALException::driverException($this, $e);
         }
