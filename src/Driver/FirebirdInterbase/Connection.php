@@ -82,6 +82,8 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
      */
     public function __construct(array $params, $username, $password, array $driverOptions = array())
     {
+        $this->close(); // Close/reset; because calling __construct after instantiation is apparently a thing
+
         $this->connectString = self::generateConnectString($params);
         $this->isPersistent = self::DEFAULT_IS_PERSISTENT;
         if (isset($params['isPersistent']) && is_bool($params['isPersistent'])) {
@@ -107,14 +109,7 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
 
     public function __destruct()
     {
-        if ($this->_ibaseTransactionLevel > 0) {
-            $this->rollback(); // Auto-rollback explicite transactions
-        }
-        $this->autoCommit();
-        $success = @ibase_close($this->_ibaseConnectionRc);
-        if (false == $success) {
-            $this->checkLastApiCall();
-        }
+        $this->close();
     }
 
     /**
@@ -458,6 +453,26 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
             $this->checkLastApiCall();
         }
         return $result;
+    }
+
+    protected function close()
+    {
+        if ($this->_ibaseActiveTransaction && is_resource($this->_ibaseActiveTransaction)) {
+            if ($this->_ibaseTransactionLevel > 0) {
+                $this->rollback(); // Auto-rollback explicite transactions
+            }
+            $this->autoCommit();
+        }
+        $success = true;
+        if ($this->_ibaseConnectionRc && is_resource($this->_ibaseConnectionRc)) {
+            $success = @ibase_close($this->_ibaseConnectionRc);
+        }
+        $this->_ibaseConnectionRc = null;
+        $this->_ibaseActiveTransaction  = null;
+        $this->_ibaseTransactionLevel = 0;
+        if (false == $success) {
+            $this->checkLastApiCall();
+        }
     }
 
     /**
