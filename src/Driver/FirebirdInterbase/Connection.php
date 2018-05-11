@@ -201,7 +201,7 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
     /**
      * {@inheritdoc}
      */
-    public function quote($input, $type=\PDO::PARAM_STR)
+    public function quote($value, $type=\PDO::PARAM_STR)
     {
         if (is_int($value) || is_float($value)) {
             return $value;
