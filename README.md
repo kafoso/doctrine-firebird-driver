@@ -12,6 +12,7 @@ To utilize this library in your application code, the following is required:
 - [Firebird](https://firebirdsql.org/) version 2.5.*
   - Version 3.* is not supported. You are very welcome to provide a pull request for this.
 - PHP >= 5.6.0
+- ibase PHP extension (http://php.net/manual/en/book.ibase.php). Only needed on guest OS, e.g. a VM installed through Docker, Vagrant, or XAMPP.
 - [doctrine/dbal: 2.5.\*](https://packagist.org/packages/doctrine/dbal#v2.5.0)
 
 # License & Disclaimer
