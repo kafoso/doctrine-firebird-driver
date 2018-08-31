@@ -4,6 +4,7 @@ namespace Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase;
 use Doctrine\DBAL\Driver\Connection as ConnectionInterface;
 use Doctrine\DBAL\Driver\ServerInfoAwareConnection;
 use Kafoso\DoctrineFirebirdDriver\Driver\AbstractFirebirdInterbaseDriver;
+use Kafoso\DoctrineFirebirdDriver\ValueFormatter;
 
 /**
  * Based on https://github.com/helicon-os/doctrine-dbal
@@ -222,13 +223,30 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
 
     /**
      * {@inheritdoc}
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      */
     public function lastInsertId($name = null)
     {
         if ($name === null) {
             return false;
         }
-        $sql = "SELECT GEN_ID('{$name}', 0) LAST_VAL FROM RDB\$DATABASE";
+        if (false == is_string($name)) {
+            throw new \InvalidArgumentException(sprintf(
+                "Argument \$name must be null or a string. Found: %s",
+                ValueFormatter::found($name)
+            ));
+        }
+        $maxGeneratorLength = 31;
+        $regex = "/^\w{1,{$maxGeneratorLength}}\$/";
+        if (false == preg_match($regex, $name)) {
+            throw new \UnexpectedValueException(sprintf(
+                "Expects argument \$name to match regular expression '%s'. Found: %s",
+                $regex,
+                ValueFormatter::found($name)
+            ));
+        }
+        $sql = "SELECT GEN_ID({$name}, 0) LAST_VAL FROM RDB\$DATABASE";
         $stmt = $this->query($sql);
         $result = $stmt->fetchColumn(0);
         return $result;
