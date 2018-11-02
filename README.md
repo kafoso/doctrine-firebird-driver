@@ -11,9 +11,14 @@ To utilize this library in your application code, the following is required:
 
 - [Firebird](https://firebirdsql.org/) version 2.5.*
   - Version 3.* is not supported. You are very welcome to provide a pull request for this.
-- PHP >= 5.6.0
-- ibase PHP extension (http://php.net/manual/en/book.ibase.php). Only needed on guest OS, e.g. a VM installed through Docker, Vagrant, or XAMPP.
+- PHP >= 7.1
+- PHP extensions<sup>1</sup>:
+  - [ibase](http://php.net/manual/en/book.ibase.php)
+  - [mbstring](http://php.net/manual/en/book.mbstring.php)
+  - xml
 - [doctrine/dbal: >=2.5 <=2.5.13](https://packagist.org/packages/doctrine/dbal#v2.5.0)
+
+<sup>1</sup> Only needed on remote/guest OS, e.g. a remote Ubuntu server or a VM installed through Docker, Vagrant, or XAMPP.
 
 # License & Disclaimer
 
@@ -101,12 +106,14 @@ Due to the database being created by the PHP bootstrap script on the fly, `root`
 1. `vagrant ssh`
 2. `sudo su`
 3. `apt-get install zip -y` (for when installing composer packages)
-4. Install composer. Follow these instructions: https://getcomposer.org/download/
+4. Install composer (on guest OS). Follow these instructions: https://getcomposer.org/download/
 5. `mv composer.phar /usr/bin/composer`
 6. `cd /var/git/kafoso/doctrine-firebird-driver`
-7. `composer install` (will say you shouldn't run it as root/super user, but it's fine in the VM)
+7. `composer install`<sup>1</sup>
 8. `cd /var/git/kafoso/doctrine-firebird-driver/tests`
 9. `php ../bin/phpunit tests`
+
+<sup>1</sup> Composer will say you shouldn't run it as root/super user. This is techically true, but it's fine in the VM.
 
 # Credits
 
