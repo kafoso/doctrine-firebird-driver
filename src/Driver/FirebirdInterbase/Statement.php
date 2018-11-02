@@ -57,7 +57,7 @@ class Statement implements \IteratorAggregate, StatementInterace
      */
     protected $defaultFetchClassConstructorArgs = [];
     /**
-     * @var Object  Object used as target by FETCH_INTO
+     * @var null|Object  Object used as target by FETCH_INTO
      */
     protected $defaultFetchInto = null;
     /**
@@ -65,7 +65,7 @@ class Statement implements \IteratorAggregate, StatementInterace
      * @var integer
      */
     protected $affectedRows = 0;
-    protected $numFields = false;
+    protected $numFields = 0;
     /**
      * Mapping between parameter names and positions
      *
@@ -303,11 +303,11 @@ class Statement implements \IteratorAggregate, StatementInterace
             // Result seems ok - is either #rows or result handle
             if (is_numeric($this->ibaseResultRc)) {
                 $this->affectedRows = $this->ibaseResultRc;
-                $this->numFields = @ibase_num_fields($this->ibaseResultRc);
+                $this->numFields = @ibase_num_fields($this->ibaseResultRc) ?: 0;
                 $this->ibaseResultRc = null;
             } elseif (is_resource($this->ibaseResultRc)) {
                 $this->affectedRows = @ibase_affected_rows($this->connection->getActiveTransaction());
-                $this->numFields = @ibase_num_fields($this->ibaseResultRc);
+                $this->numFields = @ibase_num_fields($this->ibaseResultRc) ?: 0;
             }
             // As the ibase-api does not have an auto-commit-mode, autocommit is simulated by calling the
             // function autoCommit of the connection
@@ -319,9 +319,8 @@ class Statement implements \IteratorAggregate, StatementInterace
         if ($this->ibaseResultRc === false) {
             $this->ibaseResultRc = null;
             return false;
-        } else {
-            return true;
         }
+        return true;
     }
 
     /**
@@ -338,7 +337,7 @@ class Statement implements \IteratorAggregate, StatementInterace
      *
      * @param object|string $fetchIntoObjectOrClass Object class to create or object to update
      *
-     * @return boolean
+     * @return boolean|object
      */
     public function fetchObject($fetchIntoObjectOrClass = '\stdClass')
     {
@@ -366,9 +365,8 @@ class Statement implements \IteratorAggregate, StatementInterace
                 return $this->internalFetchNum();
             case \PDO::FETCH_BOTH:
                 return $this->internalFetchBoth();
-            default:
-                throw new Exception('Fetch mode ' . $fetchMode . ' not supported by this driver in ' . __METHOD__);
         }
+        throw new Exception('Fetch mode ' . $fetchMode . ' not supported by this driver in ' . __METHOD__);
     }
 
     /**
@@ -379,29 +377,36 @@ class Statement implements \IteratorAggregate, StatementInterace
         $fetchMode !== null || $fetchMode = $this->defaultFetchMode;
         switch ($fetchMode) {
             case \PDO::FETCH_CLASS:
-            case \PDO::FETCH_OBJ: {
-                    return $this->internalFetchAllClassOrObjects(
-                                    $fetchArgument == null ? $this->defaultFetchClass : $fetchArgument, $ctorArgs == null ? $this->defaultFetchClassConstructorArgs : $ctorArgs);
-                    break;
+            case \PDO::FETCH_OBJ:
+                if (null === $fetchArgument) {
+                    $fetchArgument = $this->defaultFetchClass;
                 }
-            case \PDO::FETCH_COLUMN: {
-                    return $this->internalFetchAllColumn(
-                                    $fetchArgument == null ? 0 : $fetchArgument);
-                    break;
+                if (is_object($fetchArgument)) {
+                    throw new Exception(sprintf(
+                        "Cannot use \PDO::FETCH_OBJ; fetching multiple rows into single object is impossible. Provided class was: \\%s",
+                        get_class($fetchArgument)
+                    ));
                 }
-            case \PDO::FETCH_BOTH: {
-                    return $this->internalFetchAllBoth();
-                }
-            case \PDO::FETCH_ASSOC: {
-                    return $this->internalFetchAllAssoc();
-                }
-            case \PDO::FETCH_NUM: {
-                    return $this->internalFetchAllNum();
-                }
-            default: {
-                    throw new Exception('Fetch mode ' . $fetchMode . ' not supported by this driver in ' . __METHOD__);
-                }
+                return $this->internalFetchAllClassOrObjects(
+                    $fetchArgument,
+                    $ctorArgs == null ? $this->defaultFetchClassConstructorArgs : $ctorArgs
+                );
+            case \PDO::FETCH_COLUMN:
+                return $this->internalFetchAllColumn(
+                                $fetchArgument == null ? 0 : $fetchArgument);
+            case \PDO::FETCH_BOTH:
+                return $this->internalFetchAllBoth();
+            case \PDO::FETCH_ASSOC:
+                return $this->internalFetchAllAssoc();
+            case \PDO::FETCH_NUM:
+                return $this->internalFetchAllNum();
+            case \PDO::FETCH_INTO:
+                throw new Exception(sprintf(
+                    "Cannot use \PDO::FETCH_INTO; fetching multiple rows into single object is impossible. Provided class was: \\%s",
+                    get_class($fetchArgument)
+                ));
         }
+        throw new Exception('Fetch mode ' . $fetchMode . ' not supported by this driver in ' . __METHOD__);
     }
     /**
      * {@inheritdoc}
@@ -543,7 +548,7 @@ class Statement implements \IteratorAggregate, StatementInterace
     protected function internalFetchBoth()
     {
         $tmpData = @ibase_fetch_assoc($this->ibaseResultRc, IBASE_TEXT);
-        if (false !== $tmpData) {
+        if (is_array($tmpData)) {
             return array_merge(array_values($tmpData), $tmpData);
         }
         return false;
