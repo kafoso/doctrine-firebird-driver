@@ -16,7 +16,7 @@ To utilize this library in your application code, the following is required:
   - [ibase](http://php.net/manual/en/book.ibase.php)
   - [mbstring](http://php.net/manual/en/book.mbstring.php)
   - xml
-- [doctrine/dbal: >=2.5 <=2.5.13](https://packagist.org/packages/doctrine/dbal#v2.5.0)
+- [doctrine/dbal: >=2.6](https://packagist.org/packages/doctrine/dbal#v2.6.0)
 
 <sup>1</sup> Only needed on remote/guest OS, e.g. a remote Ubuntu server or a VM installed through Docker, Vagrant, or XAMPP.
 
@@ -49,7 +49,7 @@ Via Github:
 
 For example of configuration in PHP, see [`tests/tests/Test/Integration/AbstractIntegrationTest.php`](tests/tests/Test/Integration/AbstractIntegrationTest.php) (in the method `setUp`).
 
-Additional help may be found at: https://www.doctrine-project.org/projects/doctrine-orm/en/2.5/reference/advanced-configuration.html
+Additional help may be found at: https://www.doctrine-project.org/projects/doctrine-orm/en/2.6/index.html
 
 ### Symfony configuration (YAML)
 
@@ -129,7 +129,7 @@ https://github.com/upmedia
 
 ### https://github.com/doctrine/dbal
 
-Fundamental Doctrine DBAL implementation. The driver and platform logic in this library is based on other implementations in the core library, largely [`\Doctrine\DBAL\Driver\PDOOracle\Driver`](https://github.com/doctrine/dbal/blob/v2.5.0/lib/Doctrine/DBAL/Driver/PDOOracle/Driver.php) and [`\Doctrine\DBAL\Platforms\OraclePlatform`](https://github.com/doctrine/dbal/blob/v2.5.0/lib/Doctrine/DBAL/Platforms/OraclePlatform.php), and their respective parent classes.
+Fundamental Doctrine DBAL implementation. The driver and platform logic in this library is based on other implementations in the core library, largely [`\Doctrine\DBAL\Driver\PDOOracle\Driver`](https://github.com/doctrine/dbal/blob/v2.6.0/lib/Doctrine/DBAL/Driver/PDOOracle/Driver.php) and [`\Doctrine\DBAL\Platforms\OraclePlatform`](https://github.com/doctrine/dbal/blob/v2.6.0/lib/Doctrine/DBAL/Platforms/OraclePlatform.php), and their respective parent classes.
 
 ### https://github.com/helicon-os/doctrine-dbal
 
