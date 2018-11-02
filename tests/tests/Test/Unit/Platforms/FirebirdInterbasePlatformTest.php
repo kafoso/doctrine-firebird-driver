@@ -1089,24 +1089,24 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
     {
         $found = $this->_platform->getListTableColumnsSQL('foo');
         $this->assertInternalType("string", $found);
-        $this->assertStringStartsWith("SELECT TRIM(r.RDB\$FIELD_NAME) AS \"FIELD_NAME\",\r", ltrim($found));
-        $this->assertContains(" FROM RDB\$RELATION_FIELDS r\r", $found);
+        $this->assertStringStartsWith("SELECT TRIM(r.RDB\$FIELD_NAME) AS \"FIELD_NAME\",".PHP_EOL, ltrim($found));
+        $this->assertContains(" FROM RDB\$RELATION_FIELDS r".PHP_EOL, $found);
     }
 
     public function testGetListTableForeignKeysSQL()
     {
         $found = $this->_platform->getListTableForeignKeysSQL('foo');
         $this->assertInternalType("string", $found);
-        $this->assertStringStartsWith("SELECT TRIM(rc.RDB\$CONSTRAINT_NAME) AS constraint_name,\r", ltrim($found));
-        $this->assertContains(" FROM RDB\$INDEX_SEGMENTS s\r", $found);
+        $this->assertStringStartsWith("SELECT TRIM(rc.RDB\$CONSTRAINT_NAME) AS constraint_name,".PHP_EOL, ltrim($found));
+        $this->assertContains(" FROM RDB\$INDEX_SEGMENTS s".PHP_EOL, $found);
     }
 
     public function testGetListTableIndexesSQL()
     {
         $found = $this->_platform->getListTableIndexesSQL('foo');
         $this->assertInternalType("string", $found);
-        $this->assertStringStartsWith("SELECT\r", ltrim($found));
-        $this->assertContains("FROM RDB\$INDEX_SEGMENTS\r", $found);
+        $this->assertStringStartsWith("SELECT".PHP_EOL, ltrim($found));
+        $this->assertContains("FROM RDB\$INDEX_SEGMENTS".PHP_EOL, $found);
     }
 
     public function testGetSQLResultCasing()

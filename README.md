@@ -100,8 +100,13 @@ Due to the database being created by the PHP bootstrap script on the fly, `root`
 
 1. `vagrant ssh`
 2. `sudo su`
-3. `cd /var/git/kafoso/doctrine-firebird-driver/tests`
-4. `../vendor/phpunit/phpunit/phpunit tests`
+3. `apt-get install zip -y` (for when installing composer packages)
+4. Install composer. Follow these instructions: https://getcomposer.org/download/
+5. `mv composer.phar /usr/bin/composer`
+6. `cd /var/git/kafoso/doctrine-firebird-driver`
+7. `composer install` (will say you shouldn't run it as root/super user, but it's fine in the VM)
+8. `cd /var/git/kafoso/doctrine-firebird-driver/tests`
+9. `php ../bin/phpunit tests`
 
 # Credits
 
