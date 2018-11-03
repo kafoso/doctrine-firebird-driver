@@ -2,6 +2,7 @@
 namespace Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase;
 
 use Doctrine\DBAL\Driver\Statement as StatementInterface;
+use Kafoso\DoctrineFirebirdDriver\ValueFormatter;
 
 /**
  * Based on:
@@ -10,6 +11,11 @@ use Doctrine\DBAL\Driver\Statement as StatementInterface;
  */
 class Statement implements \IteratorAggregate, StatementInterface
 {
+    const DEFAULT_FETCH_CLASS = '\stdClass';
+    const DEFAULT_FETCH_CLASS_CONSTRUCTOR_ARGS = [];
+    const DEFAULT_FETCH_COLUMN = 0;
+    const DEFAULT_FETCH_MODE = \PDO::FETCH_BOTH;
+
     /**
      * @var Connection $connection
      */
@@ -46,25 +52,25 @@ class Statement implements \IteratorAggregate, StatementInterface
     /**
      * @var integer Default fetch mode set by setFetchMode
      */
-    protected $defaultFetchMode = \PDO::FETCH_BOTH;
+    protected $defaultFetchMode = self::DEFAULT_FETCH_MODE;
 
     /**
      * @var string  Default class to be used by FETCH_CLASS or FETCH_OBJ
      */
-    protected $defaultFetchClass = '\stdClass';
+    protected $defaultFetchClass = self::DEFAULT_FETCH_CLASS;
 
     /**
      * @var integer Default column to fetch by FETCH_COLUMN
      */
-    protected $defaultFetchColumn = 0;
+    protected $defaultFetchColumn = self::DEFAULT_FETCH_COLUMN;
 
     /**
      * @var array   Parameters to be passed to constructor in FETCH_CLASS
      */
-    protected $defaultFetchClassConstructorArgs = [];
+    protected $defaultFetchClassConstructorArgs = self::DEFAULT_FETCH_CLASS_CONSTRUCTOR_ARGS;
 
     /**
-     * @var Object  Object used as target by FETCH_INTO
+     * @var null|Object  Object used as target by FETCH_INTO
      */
     protected $defaultFetchInto = null;
 
@@ -105,23 +111,65 @@ class Statement implements \IteratorAggregate, StatementInterface
     {
         switch ($fetchMode) {
             case \PDO::FETCH_OBJ:
-            case \PDO::FETCH_CLASS: {
-                    $this->defaultFetchMode = $fetchMode;
-                    $this->defaultFetchClass = is_string($arg2) ? $arg2 : '\stdClass';
-                    $this->defaultFetchClassConstructorArgs = is_array($arg3) ? $arg3 : [];
-                    break;
+            case \PDO::FETCH_CLASS:
+                $fetchClass = '\stdClass';
+                if (is_string($arg2)) {
+                    $fetchClass = $arg2;
                 }
-            case \PDO::FETCH_INTO: {
-                    $this->defaultFetchMode = $fetchMode;
-                    $this->defaultFetchInfo = $arg2;
+                if (false == class_exists($fetchClass)) {
+                    throw new Exception(sprintf(
+                        "Fetch class %s (from \$arg2) does not exist",
+                        ValueFormatter::cast($fetchClass)
+                    ));
                 }
-            case \PDO::FETCH_COLUMN: {
-                    $this->defaultFetchMode = $fetchMode;
-                    $this->defaultFetchColumn = isset($arg2) ? $arg2 : 0;
-                }
-            default:
                 $this->defaultFetchMode = $fetchMode;
+                $this->defaultFetchClass = $fetchClass;
+                $this->defaultFetchClassConstructorArgs = self::DEFAULT_FETCH_CLASS_CONSTRUCTOR_ARGS;
+                if (is_array($arg3)) {
+                    $this->defaultFetchClassConstructorArgs = $arg3;
+                }
+                $this->defaultFetchColumn = self::DEFAULT_FETCH_COLUMN;
+                $this->defaultFetchInto = null;
+                return;
+            case \PDO::FETCH_INTO:
+                $fetchInto = $arg2;
+                if (false == is_object($fetchInto)) {
+                    throw new Exception(sprintf(
+                        "Fetch into (from \$arg2) must be an object. Found: %s",
+                        ValueFormatter::found($fetchClass)
+                    ));
+                }
+                $this->defaultFetchMode = $fetchMode;
+                $this->defaultFetchClass = self::DEFAULT_FETCH_CLASS;
+                $this->defaultFetchClassConstructorArgs = self::DEFAULT_FETCH_CLASS_CONSTRUCTOR_ARGS;
+                $this->defaultFetchColumn = self::DEFAULT_FETCH_COLUMN;
+                $this->defaultFetchInto = $fetchInto;
+                return;
+            case \PDO::FETCH_COLUMN:
+                $fetchColumn = self::DEFAULT_FETCH_COLUMN;
+                if (is_int($arg2)) {
+                    $fetchColumn = $arg2;
+                }
+                $this->defaultFetchMode = $fetchMode;
+                $this->defaultFetchClass = self::DEFAULT_FETCH_CLASS;
+                $this->defaultFetchClassConstructorArgs = self::DEFAULT_FETCH_CLASS_CONSTRUCTOR_ARGS;
+                $this->defaultFetchColumn = $fetchColumn;
+                $this->defaultFetchInto = null;
+                return;
+            case \PDO::FETCH_BOTH:
+            case \PDO::FETCH_ASSOC:
+            case \PDO::FETCH_NUM:
+                $this->defaultFetchMode = $fetchMode;
+                $this->defaultFetchClass = self::DEFAULT_FETCH_CLASS;
+                $this->defaultFetchClassConstructorArgs = self::DEFAULT_FETCH_CLASS_CONSTRUCTOR_ARGS;
+                $this->defaultFetchColumn = self::DEFAULT_FETCH_COLUMN;
+                $this->defaultFetchInto = null;
+                return;
         }
+        throw new Exception(sprintf(
+            "Fetch mode %s is not supported",
+            ValueFormatter::cast($fetchMode)
+        ));
     }
 
     /**
@@ -218,9 +266,8 @@ class Statement implements \IteratorAggregate, StatementInterface
         if ($this->ibaseResultRc === false) {
             $this->ibaseResultRc = null;
             return false;
-        } else {
-            return true;
         }
+        return true;
     }
 
     /**
@@ -228,27 +275,47 @@ class Statement implements \IteratorAggregate, StatementInterface
      */
     public function fetch($fetchMode = null, $cursorOrientation = \PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
     {
-        if (!$this->ibaseResultRc) {
-            return false;
-        }
         if (null === $fetchMode) {
             $fetchMode = $this->defaultFetchMode;
         }
         switch ($fetchMode) {
             case \PDO::FETCH_OBJ:
             case \PDO::FETCH_CLASS:
-                return $this->internalFetchClassOrObject($this->defaultFetchClass, $this->defaultFetchClassConstructorArgs);
+                if ($this->ibaseResultRc) {
+                    return $this->internalFetchClassOrObject(
+                        $this->defaultFetchClass,
+                        $this->defaultFetchClassConstructorArgs
+                    );
+                }
+                return false;
             case \PDO::FETCH_INTO:
-                return $this->internalFetchClassOrObject($this->defaultFetchInto, []);
+                if ($this->ibaseResultRc) {
+                    return $this->internalFetchClassOrObject($this->defaultFetchInto, []);
+                }
+                return false;
             case \PDO::FETCH_ASSOC:
-                return $this->internalFetchAssoc();
+                if ($this->ibaseResultRc) {
+                    return $this->internalFetchAssoc();
+                }
+                return false;
             case \PDO::FETCH_NUM:
-                return $this->internalFetchNum();
+                if ($this->ibaseResultRc) {
+                    return $this->internalFetchNum();
+                }
+                return false;
             case \PDO::FETCH_BOTH:
-                return $this->internalFetchBoth();
+                if ($this->ibaseResultRc) {
+                    return $this->internalFetchBoth();
+                }
+                return false;
             default:
-                throw new Exception('Fetch mode ' . $fetchMode . ' not supported by this driver in ' . __METHOD__);
+                throw new Exception(sprintf(
+                    "Fetch mode %s not supported by this driver. Called in method %s",
+                    ValueFormatter::cast($fetchMode),
+                    __METHOD__
+                ));
         }
+        return false;
     }
 
     /**
@@ -256,30 +323,66 @@ class Statement implements \IteratorAggregate, StatementInterface
      */
     public function fetchAll($fetchMode = null, $fetchArgument = null, $ctorArgs = null)
     {
-        if (!$this->ibaseResultRc) {
-            return [];
-        }
         if (null === $fetchMode) {
             $fetchMode = $this->defaultFetchMode;
+        }
+        if (\PDO::FETCH_INTO === $fetchMode) {
+            $fetchInto = $fetchArgument;
+            if (null === $fetchInto) {
+                $fetchInto = $this->defaultFetchInto;
+            }
+            throw new Exception(sprintf(
+                "Cannot use \PDO::FETCH_INTO; fetching multiple rows into single object is impossible. Fetch object is: %s",
+                ValueFormatter::cast($fetchInto)
+            ));
         }
         switch ($fetchMode) {
             case \PDO::FETCH_CLASS:
             case \PDO::FETCH_OBJ:
-                return $this->internalFetchAllClassOrObjects(
-                    $fetchArgument == null ? $this->defaultFetchClass : $fetchArgument,
-                    $ctorArgs == null ? $this->defaultFetchClassConstructorArgs : $ctorArgs
-                );
+                if (null === $fetchArgument) {
+                    $fetchArgument = $this->defaultFetchClass;
+                } elseif (false == is_string($fetchArgument)) {
+                    throw new Exception(sprintf(
+                        "Argument \$fetchArgument must - when fetch mode is %s - be null or a string. Found: %s",
+                        ($fetchMode === \PDO::FETCH_CLASS ? '\PDO::FETCH_CLASS' : '\PDO::FETCH_OBJ'),
+                        ValueFormatter::found($fetchArgument)
+                    ));
+                }
+                if ($this->ibaseResultRc) {
+                    return $this->internalFetchAllClassOrObjects(
+                        $fetchArgument,
+                        $ctorArgs == null ? $this->defaultFetchClassConstructorArgs : $ctorArgs
+                    );
+                }
+                return [];
             case \PDO::FETCH_COLUMN:
-                return $this->internalFetchAllColumn($fetchArgument == null ? 0 : $fetchArgument);
+                if ($this->ibaseResultRc) {
+                    return $this->internalFetchAllColumn($fetchArgument == null ? 0 : $fetchArgument);
+                }
+                return [];
             case \PDO::FETCH_BOTH:
-                return $this->internalFetchAllBoth();
+                if ($this->ibaseResultRc) {
+                    return $this->internalFetchAllBoth();
+                }
+                return [];
             case \PDO::FETCH_ASSOC:
-                return $this->internalFetchAllAssoc();
+                if ($this->ibaseResultRc) {
+                    return $this->internalFetchAllAssoc();
+                }
+                return [];
             case \PDO::FETCH_NUM:
-                return $this->internalFetchAllNum();
+                if ($this->ibaseResultRc) {
+                    return $this->internalFetchAllNum();
+                }
+                return [];
             default:
-                throw new Exception('Fetch mode ' . $fetchMode . ' not supported by this driver in ' . __METHOD__);
+                throw new Exception(sprintf(
+                    "Fetch mode %s not supported by this driver. Called through method %s",
+                    ValueFormatter::cast($fetchMode),
+                    __METHOD__
+                ));
         }
+        return [];
     }
 
     /**
@@ -288,6 +391,18 @@ class Statement implements \IteratorAggregate, StatementInterface
     public function fetchColumn($columnIndex = 0)
     {
         return $this->internalFetchColumn($columnIndex);
+    }
+
+    /**
+     * Fetches a single row into a object
+     *
+     * @param object|string $fetchIntoObjectOrClass Object class to create or object to update
+     *
+     * @return boolean|object
+     */
+    public function fetchObject($fetchIntoObjectOrClass = '\stdClass')
+    {
+        return $this->internalFetchClassOrObject($fetchIntoObjectOrClass);
     }
 
     /**
@@ -466,7 +581,7 @@ class Statement implements \IteratorAggregate, StatementInterface
     protected function internalFetchBoth()
     {
         $tmpData = @ibase_fetch_assoc($this->ibaseResultRc, IBASE_TEXT);
-        if (false !== $tmpData) {
+        if (is_array($tmpData)) {
             return array_merge(array_values($tmpData), $tmpData);
         }
         return false;
