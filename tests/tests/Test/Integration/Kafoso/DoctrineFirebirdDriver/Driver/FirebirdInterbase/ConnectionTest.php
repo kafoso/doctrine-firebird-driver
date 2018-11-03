@@ -7,11 +7,11 @@ use Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Statement;
 use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
 use Kafoso\DoctrineFirebirdDriver\Test\Resource\Entity;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class ConnectionTest extends AbstractIntegrationTest
 {
-    /**
-     * @runInSeparateProcess
-     */
     public function testBasics()
     {
         $connection = $this->_entityManager->getConnection()->getWrappedConnection();
@@ -40,9 +40,6 @@ class ConnectionTest extends AbstractIntegrationTest
         );
     }
 
-    /**
-     * @runInSeparateProcess
-     */
     public function testLastInsertIdWorks()
     {
         $id = $this->_entityManager->getConnection()->lastInsertId('ALBUM_ID_SEQ');
@@ -78,7 +75,6 @@ class ConnectionTest extends AbstractIntegrationTest
     }
 
     /**
-     * @runInSeparateProcess
      * @dataProvider dataProvider_testGetStartTransactionSqlWorks
      */
     public function testGetStartTransactionSqlWorks($expected, $isolationLevel, $timeout)
@@ -133,7 +129,6 @@ class ConnectionTest extends AbstractIntegrationTest
     }
 
     /**
-     * @runInSeparateProcess
      * @expectedException Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Exception
      * @expectedExceptionMessage Isolation level -1 is not supported
      */
@@ -143,9 +138,6 @@ class ConnectionTest extends AbstractIntegrationTest
         $connection->getStartTransactionSql(-1);
     }
 
-    /**
-     * @runInSeparateProcess
-     */
     public function testBeginTransaction()
     {
         $connection = $this->_entityManager->getConnection()->getWrappedConnection();

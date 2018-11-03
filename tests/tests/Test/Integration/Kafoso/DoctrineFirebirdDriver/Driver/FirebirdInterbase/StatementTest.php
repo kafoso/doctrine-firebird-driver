@@ -4,11 +4,11 @@ namespace Kafoso\DoctrineFirebirdDriver\Test\Integration\Kafoso\DoctrineFirebird
 use Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Statement;
 use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class StatementTest extends AbstractIntegrationTest
 {
-    /**
-     * @runInSeparateProcess
-     */
     public function testFetchWorks()
     {
         $connection = $this->_entityManager->getConnection()->getWrappedConnection();
@@ -77,9 +77,6 @@ class StatementTest extends AbstractIntegrationTest
         $this->assertSame(2, $row['ARTIST_ID']);
     }
 
-    /**
-     * @runInSeparateProcess
-     */
     public function testFetchAllWorks()
     {
         $connection = $this->_entityManager->getConnection()->getWrappedConnection();
@@ -161,9 +158,6 @@ class StatementTest extends AbstractIntegrationTest
         $this->assertSame(3, $rows[1]['ARTIST_ID'] ?? false);
     }
 
-    /**
-     * @runInSeparateProcess
-     */
     public function testFetchColumnWorks()
     {
         $connection = $this->_entityManager->getConnection()->getWrappedConnection();
@@ -187,9 +181,6 @@ class StatementTest extends AbstractIntegrationTest
         $this->assertSame(2, $column);
     }
 
-    /**
-     * @runInSeparateProcess
-     */
     public function testGetIteratorWorks()
     {
         $connection = $this->_entityManager->getConnection()->getWrappedConnection();
@@ -207,9 +198,6 @@ class StatementTest extends AbstractIntegrationTest
         $this->assertSame(2, $array[1]['ID'] ?? false);
     }
 
-    /**
-     * @runInSeparateProcess
-     */
     public function testExecuteWorks()
     {
         $connection = $this->_entityManager->getConnection()->getWrappedConnection();
@@ -218,9 +206,6 @@ class StatementTest extends AbstractIntegrationTest
         $this->assertTrue($statement->execute());
     }
 
-    /**
-     * @runInSeparateProcess
-     */
     public function testExecuteWorksWithParameters()
     {
         $connection = $this->_entityManager->getConnection()->getWrappedConnection();
@@ -229,9 +214,6 @@ class StatementTest extends AbstractIntegrationTest
         $this->assertTrue($statement->execute([1]));
     }
 
-    /**
-     * @runInSeparateProcess
-     */
     public function testBindValueWorks()
     {
         $connection = $this->_entityManager->getConnection()->getWrappedConnection();
@@ -243,9 +225,6 @@ class StatementTest extends AbstractIntegrationTest
         $this->assertSame(2, $value);
     }
 
-    /**
-     * @runInSeparateProcess
-     */
     public function testBindParamWorks()
     {
         $connection = $this->_entityManager->getConnection()->getWrappedConnection();

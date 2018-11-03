@@ -3,6 +3,9 @@ namespace Kafoso\DoctrineFirebirdDriver\Test\Integration\Doctrine\DBAL\Database;
 
 use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class TransactionTest extends AbstractIntegrationTest
 {
     public function testWillAutoCommitBottomLevelTransaction()
