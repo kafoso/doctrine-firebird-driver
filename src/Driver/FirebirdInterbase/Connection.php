@@ -253,11 +253,9 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
     }
 
     /**
-     * @param int $isolationLevel
-     * @param int $timeout
-     * @return string
+     * @throws Exception
      */
-    public function getStartTransactionSql($isolationLevel, $timeout = 5)
+    public function getStartTransactionSql(int $isolationLevel): string
     {
         $result = "";
         switch ($isolationLevel) {
@@ -268,11 +266,16 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
                 $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL READ COMMITTED RECORD_VERSION';
                 break;
             case \Doctrine\DBAL\Connection::TRANSACTION_REPEATABLE_READ:
-                $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL SNAPSHOT ';
+                $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL SNAPSHOT';
                 break;
             case \Doctrine\DBAL\Connection::TRANSACTION_SERIALIZABLE:
                 $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL SNAPSHOT TABLE STABILITY';
                 break;
+            default:
+                throw new Exception(sprintf(
+                    "Isolation level %s is not supported",
+                    ValueFormatter::cast($isolationLevel)
+                ));
         }
         if (($this->attrDcTransWait > 0)) {
             $result .= ' WAIT LOCK TIMEOUT ' . $this->attrDcTransWait;
