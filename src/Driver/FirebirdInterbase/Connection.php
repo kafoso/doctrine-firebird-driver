@@ -261,22 +261,18 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
     {
         $result = "";
         switch ($isolationLevel) {
-            case \Doctrine\DBAL\Connection::TRANSACTION_READ_UNCOMMITTED: {
-                    $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL READ COMMITTED RECORD_VERSION';
-                    break;
-                }
-            case \Doctrine\DBAL\Connection::TRANSACTION_READ_COMMITTED: {
-                    $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL READ COMMITTED RECORD_VERSION';
-                    break;
-                }
-            case \Doctrine\DBAL\Connection::TRANSACTION_REPEATABLE_READ: {
-                    $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL SNAPSHOT ';
-                    break;
-                }
-            case \Doctrine\DBAL\Connection::TRANSACTION_SERIALIZABLE: {
-                    $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL SNAPSHOT TABLE STABILITY';
-                    break;
-                }
+            case \Doctrine\DBAL\Connection::TRANSACTION_READ_UNCOMMITTED:
+                $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL READ COMMITTED RECORD_VERSION';
+                break;
+            case \Doctrine\DBAL\Connection::TRANSACTION_READ_COMMITTED:
+                $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL READ COMMITTED RECORD_VERSION';
+                break;
+            case \Doctrine\DBAL\Connection::TRANSACTION_REPEATABLE_READ:
+                $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL SNAPSHOT ';
+                break;
+            case \Doctrine\DBAL\Connection::TRANSACTION_SERIALIZABLE:
+                $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL SNAPSHOT TABLE STABILITY';
+                break;
         }
         if (($this->attrDcTransWait > 0)) {
             $result .= ' WAIT LOCK TIMEOUT ' . $this->attrDcTransWait;

@@ -69,6 +69,18 @@ class StatementTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Exception
+     * @expectedExceptionMessage Argument $fetchArgument must - when fetch mode is \PDO::FETCH_COLUMN - be an integer. Found: (string) "1"
+     */
+    public function testFetchAllThrowsExceptionWhenModeIsPdoFetchColumnAndFetchArgumentIsNotAnInteger()
+    {
+        $connection = $this->_mockConnection();
+        $statement = new Statement($connection, "SELECT * FROM dummy");
+        $object = new \stdClass;
+        $statement->fetchAll(\PDO::FETCH_COLUMN, "1");
+    }
+
+    /**
+     * @expectedException Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Exception
      * @expectedExceptionMessage Fetch mode -1 not supported by this driver. Called through method Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Statement::fetchAll
      */
     public function testFetchAllThrowsExceptionWhenModeIsUnsupported()

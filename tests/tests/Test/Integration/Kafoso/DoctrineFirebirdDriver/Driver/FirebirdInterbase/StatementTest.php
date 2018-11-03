@@ -190,37 +190,6 @@ class StatementTest extends AbstractIntegrationTest
     /**
      * @runInSeparateProcess
      */
-    public function testFetchObject()
-    {
-        $connection = $this->_entityManager->getConnection()->getWrappedConnection();
-        $sql = "SELECT * FROM Album";
-        $statement = new Statement($connection, $sql);
-
-        $statement->execute();
-        $objectA = $statement->fetchObject();
-        $this->assertInternalType('object', $objectA);
-        $this->assertInstanceOf('stdClass', $objectA);
-        $this->assertSame(1, $objectA->ID);
-        $this->assertSame('2017-01-01 15:00:00', $objectA->TIMECREATED);
-        $this->assertSame('...Baby One More Time', $objectA->NAME);
-        $this->assertSame(2, $objectA->ARTIST_ID);
-
-        $statement->execute();
-        $objectB = new \stdClass;
-        $objectB->dummy = 42;
-        $statement->fetchObject($objectB);
-        $this->assertInternalType('object', $objectB);
-        $this->assertInstanceOf('stdClass', $objectB);
-        $this->assertSame(42, $objectB->dummy);
-        $this->assertSame(1, $objectB->ID);
-        $this->assertSame('2017-01-01 15:00:00', $objectB->TIMECREATED);
-        $this->assertSame('...Baby One More Time', $objectB->NAME);
-        $this->assertSame(2, $objectB->ARTIST_ID);
-    }
-
-    /**
-     * @runInSeparateProcess
-     */
     public function testGetIteratorWorks()
     {
         $connection = $this->_entityManager->getConnection()->getWrappedConnection();

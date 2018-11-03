@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase;
 
 use Doctrine\DBAL\Driver\AbstractDriverException;
@@ -12,6 +14,6 @@ class Exception extends AbstractDriverException
      */
     public static function fromErrorInfo($error)
     {
-        return new self($error['message'], null, $error['code']);
+        return new self(strval($error['message']), null, intval($error['code']));
     }
 }

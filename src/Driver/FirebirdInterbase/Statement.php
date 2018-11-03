@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase;
 
 use Doctrine\DBAL\Driver\Statement as StatementInterface;
@@ -95,10 +97,9 @@ class Statement implements \IteratorAggregate, StatementInterface
     protected $namedParamsMap = [];
 
     /**
-     * @param string  $prepareString
      * @throws Exception
      */
-    public function __construct(Connection $connection, $prepareString)
+    public function __construct(Connection $connection, string $prepareString)
     {
         $this->connection = $connection;
         $this->setStatement($prepareString);
@@ -250,7 +251,7 @@ class Statement implements \IteratorAggregate, StatementInterface
             // Result seems ok - is either #rows or result handle
             if (is_numeric($this->ibaseResultRc)) {
                 $this->affectedRows = $this->ibaseResultRc;
-                $this->numFields = @ibase_num_fields($this->ibaseResultRc) ?: 0;
+                $this->numFields = 0;
                 $this->ibaseResultRc = null;
             } elseif (is_resource($this->ibaseResultRc)) {
                 $this->affectedRows = @ibase_affected_rows($this->connection->getActiveTransaction());
@@ -271,6 +272,8 @@ class Statement implements \IteratorAggregate, StatementInterface
     }
 
     /**
+     * $cursorOrientation and $cursorOffset are not supported in this driver.
+     *
      * {@inheritdoc}
      */
     public function fetch($fetchMode = null, $cursorOrientation = \PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
@@ -356,8 +359,20 @@ class Statement implements \IteratorAggregate, StatementInterface
                 }
                 return [];
             case \PDO::FETCH_COLUMN:
+                $columnIndex = 0;
+                if ($fetchArgument) {
+                    if (is_int($fetchArgument)) {
+                        $columnIndex = max(0, $fetchArgument);
+                    } else {
+                        throw new Exception(sprintf(
+                            "Argument \$fetchArgument must - when fetch mode is \\PDO::FETCH_COLUMN - be an"
+                            . " integer. Found: %s",
+                            ValueFormatter::found($fetchArgument)
+                        ));
+                    }
+                }
                 if ($this->ibaseResultRc) {
-                    return $this->internalFetchAllColumn($fetchArgument == null ? 0 : $fetchArgument);
+                    return $this->internalFetchAllColumn($columnIndex);
                 }
                 return [];
             case \PDO::FETCH_BOTH:
@@ -390,19 +405,7 @@ class Statement implements \IteratorAggregate, StatementInterface
      */
     public function fetchColumn($columnIndex = 0)
     {
-        return $this->internalFetchColumn($columnIndex);
-    }
-
-    /**
-     * Fetches a single row into a object
-     *
-     * @param object|string $fetchIntoObjectOrClass Object class to create or object to update
-     *
-     * @return boolean|object
-     */
-    public function fetchObject($fetchIntoObjectOrClass = '\stdClass')
-    {
-        return $this->internalFetchClassOrObject($fetchIntoObjectOrClass);
+        return $this->internalFetchColumn(intval($columnIndex));
     }
 
     /**
@@ -457,11 +460,9 @@ class Statement implements \IteratorAggregate, StatementInterface
     }
 
     /**
-     * Fetches a single column.
-     * @param int $columnIndex
      * @return bool|mixed
      */
-    protected function internalFetchColumn($columnIndex = 0)
+    protected function internalFetchColumn(int $columnIndex = 0)
     {
         $rowData = $this->internalFetchNum();
         if (is_array($rowData)) {
@@ -470,11 +471,7 @@ class Statement implements \IteratorAggregate, StatementInterface
         return false;
     }
 
-    /**
-     * @param int $columnIndex
-     * @return array
-     */
-    protected function internalFetchAllColumn($columnIndex = 0)
+    protected function internalFetchAllColumn(int $columnIndex = 0): array
     {
         $result = [];
         while ($data = $this->internalFetchColumn()) {
@@ -483,11 +480,7 @@ class Statement implements \IteratorAggregate, StatementInterface
         return $result;
     }
 
-    /**
-     * Fetch associative array
-     * @return array
-     */
-    protected function internalFetchAllAssoc()
+    protected function internalFetchAllAssoc(): array
     {
         $result = [];
         while ($data = $this->internalFetchAssoc()) {
@@ -506,10 +499,10 @@ class Statement implements \IteratorAggregate, StatementInterface
     }
 
     /**
-     * Fetch all records into an array of numeric arrays
+     * Fetch all records into an array of numeric arrays.
      * @return array
      */
-    protected function internalFetchAllNum()
+    protected function internalFetchAllNum(): array
     {
         $result = [];
         while ($data = $this->internalFetchNum()) {
@@ -519,10 +512,9 @@ class Statement implements \IteratorAggregate, StatementInterface
     }
 
     /**
-     * Fetches all records into an array containing arrays with column name and column index
-     * @return array
+     * Fetches all records into an array containing arrays with column name and column index.
      */
-    protected function internalFetchAllBoth()
+    protected function internalFetchAllBoth(): array
     {
         $result = [];
         while ($data = $this->internalFetchBoth()) {
@@ -542,7 +534,11 @@ class Statement implements \IteratorAggregate, StatementInterface
     {
         $rowData = $this->internalFetchAssoc();
         if (is_array($rowData)) {
-            return $this->createObjectAndSetPropertiesCaseInsenstive($aClassOrObject, is_array($constructorArguments) ? $constructorArguments : [], $rowData);
+            return $this->createObjectAndSetPropertiesCaseInsenstive(
+                $aClassOrObject,
+                (is_array($constructorArguments) ? $constructorArguments : []),
+                $rowData
+            );
         }
         return $rowData;
     }
@@ -662,8 +658,9 @@ class Statement implements \IteratorAggregate, StatementInterface
                 $this->connection->getActiveTransaction(),
                 $this->statement
             );
-            if (!$this->ibaseStatementRc || !is_resource($this->ibaseStatementRc))
+            if (!$this->ibaseStatementRc || !is_resource($this->ibaseStatementRc)) {
                 $this->checkLastApiCall();
+            }
         }
         $callArgs = $this->queryParamBindings;
         array_unshift($callArgs, $this->ibaseStatementRc);
@@ -671,11 +668,9 @@ class Statement implements \IteratorAggregate, StatementInterface
     }
 
     /**
-     * Sets and analyzes the statement
-     *
-     * @param string $statement
+     * Sets and analyzes the statement.
      */
-    protected function setStatement($statement)
+    protected function setStatement(string $statement)
     {
         $this->statement = $statement;
         $this->namedParamsMap = [];
