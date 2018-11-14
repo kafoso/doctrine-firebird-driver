@@ -447,7 +447,7 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
      *
      * @throws Exception
      */
-    protected function checkLastApiCall()
+    public function checkLastApiCall()
     {
         $lastError = $this->errorInfo();
         if (isset($lastError['code']) && $lastError['code']) {
@@ -458,6 +458,7 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
     /**
      * @param bool $commitDefaultTransaction
      * @return resource The ibase transaction.
+     * @throws Exception
      */
     protected function createTransaction($commitDefaultTransaction = true)
     {

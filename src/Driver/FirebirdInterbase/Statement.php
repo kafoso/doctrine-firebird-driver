@@ -215,7 +215,7 @@ class Statement implements \IteratorAggregate, StatementInterface
         if ($this->ibaseResultRc && is_resource($this->ibaseResultRc)) {
             $success = @ibase_free_result($this->ibaseResultRc);
             if (false == $success) {
-                $this->checkLastApiCall();
+                $this->connection->checkLastApiCall();
             }
         }
         $this->ibaseResultRc = null;
@@ -262,7 +262,7 @@ class Statement implements \IteratorAggregate, StatementInterface
             $this->connection->autoCommit();
         } else {
             // Error
-            $this->checkLastApiCall();
+            $this->connection->checkLastApiCall();
         }
         if ($this->ibaseResultRc === false) {
             $this->ibaseResultRc = null;
@@ -650,6 +650,7 @@ class Statement implements \IteratorAggregate, StatementInterface
     /**
      * Prepares the statement for further use and executes it
      * @return resource|bool
+     * @throws Exception
      */
     protected function doExecPrepared()
     {
@@ -659,7 +660,7 @@ class Statement implements \IteratorAggregate, StatementInterface
                 $this->statement
             );
             if (!$this->ibaseStatementRc || !is_resource($this->ibaseStatementRc)) {
-                $this->checkLastApiCall();
+                $this->connection->checkLastApiCall();
             }
         }
         $callArgs = $this->queryParamBindings;
