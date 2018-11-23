@@ -215,6 +215,10 @@ class Statement implements \IteratorAggregate, StatementInterface
         if ($this->ibaseResultRc && is_resource($this->ibaseResultRc)) {
             $success = @ibase_free_result($this->ibaseResultRc);
             if (false == $success) {
+                /**
+                 * Essentially untestable because Firebird has a tendency to fail hard with
+                 * "Segmentation fault (core dumped)."
+                 */
                 $this->connection->checkLastApiCall();
             }
         }
@@ -223,6 +227,7 @@ class Statement implements \IteratorAggregate, StatementInterface
 
     /**
      * {@inheritdoc}
+     * @throws \RuntimeException
      */
     public function execute($params = null)
     {
@@ -261,8 +266,7 @@ class Statement implements \IteratorAggregate, StatementInterface
             // function autoCommit of the connection
             $this->connection->autoCommit();
         } else {
-            // Error
-            $this->connection->checkLastApiCall();
+            throw new \RuntimeException("Statement execute failed. Uncovered case. Result statement is `false`");
         }
         if ($this->ibaseResultRc === false) {
             $this->ibaseResultRc = null;
@@ -638,34 +642,59 @@ class Statement implements \IteratorAggregate, StatementInterface
 
     /**
      * Prepares the statement for further use and executes it
-     * @return resource|bool
+     * @throws Exception
+     * @return resource
      */
     protected function doDirectExec()
     {
-        $callArgs = $this->queryParamBindings;
-        array_unshift($callArgs, $this->connection->getActiveTransaction(), $this->statement);
-        return @call_user_func_array('ibase_query', $callArgs);
+        try {
+            $callArgs = $this->queryParamBindings;
+            array_unshift($callArgs, $this->connection->getActiveTransaction(), $this->statement);
+            $resultResource = @call_user_func_array('ibase_query', $callArgs);
+            if (false === $resultResource) {
+                $this->connection->checkLastApiCall();
+                throw new Exception("Result resource is `false`");
+            }
+        } catch (Exception $e) {
+            throw new Exception(sprintf(
+                "Failed to perform `doDirectExec`: %s",
+                $e->getMessage()
+            ), $e->getSQLState(), $e->getErrorCode());
+        }
+        return $resultResource;
     }
 
     /**
      * Prepares the statement for further use and executes it
-     * @return resource|bool
      * @throws Exception
+     * @return resource
      */
     protected function doExecPrepared()
     {
-        if (!$this->ibaseStatementRc || !is_resource($this->ibaseStatementRc)) {
-            $this->ibaseStatementRc = @ibase_prepare(
-                $this->connection->getActiveTransaction(),
-                $this->statement
-            );
+        try {
             if (!$this->ibaseStatementRc || !is_resource($this->ibaseStatementRc)) {
-                $this->connection->checkLastApiCall();
+                $this->ibaseStatementRc = @ibase_prepare(
+                    $this->connection->getActiveTransaction(),
+                    $this->statement
+                );
+                if (!$this->ibaseStatementRc || !is_resource($this->ibaseStatementRc)) {
+                    $this->connection->checkLastApiCall();
+                }
             }
+            $callArgs = $this->queryParamBindings;
+            array_unshift($callArgs, $this->ibaseStatementRc);
+            $resultResource = @call_user_func_array('ibase_execute', $callArgs);
+            if (false === $resultResource) {
+                $this->connection->checkLastApiCall();
+                throw new Exception("Result resource is `false`");
+            }
+        } catch (Exception $e) {
+            throw new Exception(sprintf(
+                "Failed to perform `doExecPrepared`: %s",
+                $e->getMessage()
+            ), $e->getSQLState(), $e->getErrorCode());
         }
-        $callArgs = $this->queryParamBindings;
-        array_unshift($callArgs, $this->ibaseStatementRc);
-        return @call_user_func_array('ibase_execute', $callArgs);
+        return $resultResource;
     }
 
     /**

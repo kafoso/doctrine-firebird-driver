@@ -1,6 +1,7 @@
 <?php
 namespace Kafoso\DoctrineFirebirdDriver\Test\Integration\Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase;
 
+use Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Exception;
 use Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Statement;
 use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
 
@@ -214,6 +215,44 @@ class StatementTest extends AbstractIntegrationTest
         $this->assertTrue($statement->execute([1]));
     }
 
+    public function testExecuteThrowsExceptionWhenSQLIsInvalid()
+    {
+        $connection = $this->_entityManager->getConnection()->getWrappedConnection();
+        $statement = new Statement($connection, "SELECT 1");
+        try {
+            $statement->execute();
+        } catch (\Throwable $t) {
+            $this->assertSame(Exception::class, get_class($t));
+            $this->assertSame(0, $t->getCode());
+            $this->assertSame("Failed to perform `doDirectExec`: Dynamic SQL Error SQL error code = -104 Unexpected end of command - line 1, column 8 ", $t->getMessage());
+            $this->assertNull($t->getPrevious());
+            $this->assertSame(-104, $t->getErrorCode());
+            $this->assertNull($t->getSQLState());
+            return;
+        }
+        $this->fail("Exception was never thrown");
+    }
+
+    public function testExecuteThrowsExceptionWhenParameterizedSQLIsInvalid()
+    {
+        $connection = $this->_entityManager->getConnection()->getWrappedConnection();
+        $statement = new Statement($connection, "SELECT ?");
+        $variable = "foo";
+        $statement->bindParam(0, $variable);
+        try {
+            $statement->execute();
+        } catch (\Throwable $t) {
+            $this->assertSame(Exception::class, get_class($t));
+            $this->assertSame(0, $t->getCode());
+            $this->assertSame("Failed to perform `doExecPrepared`: Dynamic SQL Error SQL error code = -104 Unexpected end of command - line 1, column 8 ", $t->getMessage());
+            $this->assertNull($t->getPrevious());
+            $this->assertSame(-104, $t->getErrorCode());
+            $this->assertNull($t->getSQLState());
+            return;
+        }
+        $this->fail("Exception was never thrown");
+    }
+
     public function testBindValueWorks()
     {
         $connection = $this->_entityManager->getConnection()->getWrappedConnection();
@@ -235,5 +274,19 @@ class StatementTest extends AbstractIntegrationTest
         $statement->execute();
         $value = $statement->fetchColumn();
         $this->assertSame(2, $value);
+    }
+
+    public function testCloseCursorWorks()
+    {
+        $connection = $this->_entityManager->getConnection()->getWrappedConnection();
+        $statement = new Statement($connection, "SELECT 1 FROM Album");
+        $reflectionObjeect = new \ReflectionObject($statement);
+        $reflectionProperty = $reflectionObjeect->getProperty("ibaseResultRc");
+        $reflectionProperty->setAccessible(true);
+        $this->assertNull($reflectionProperty->getValue($statement));
+        $statement->execute();
+        $this->assertInternalType("resource", $reflectionProperty->getValue($statement));
+        $statement->closeCursor();
+        $this->assertNull($reflectionProperty->getValue($statement));
     }
 }
