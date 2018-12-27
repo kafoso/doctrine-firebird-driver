@@ -14,6 +14,7 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
     const DEFAULT_CHARSET = 'UTF-8';
     const DEFAULT_BUFFERS = 0;
     const DEFAULT_IS_PERSISTENT = true;
+    const DEFAULT_DIALECT = 0;
 
     /**
      * @var null|string
@@ -36,7 +37,7 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
     protected $buffers = 0;
 
     /**
-     * @var string
+     * @var int
      */
     protected $dialect = 0;
 
@@ -97,6 +98,13 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
         $this->buffers = self::DEFAULT_BUFFERS;
         if (isset($params['buffers']) && is_int($params['buffers']) && $params['buffers'] >= 0) {
             $this->buffers = $params['buffers'];
+        }
+        $this->dialect = self::DEFAULT_DIALECT;
+        if (isset($params['dialect'])
+            && is_int($params['dialect'])
+            && $params['dialect'] >= 0
+            && $params['dialect'] <= 3) {
+            $this->dialect = $params['dialect'];
         }
         $this->username = $username;
         $this->password = $password;
