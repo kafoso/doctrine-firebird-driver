@@ -22,7 +22,7 @@ class TransactionTest extends AbstractIntegrationTest
         $this->assertSame(42, $value);
     }
 
-    public function testCanSuccessfullyCommitASingleTransaction()
+    public function testCanSuccessfullyCommitASingleTransactionForInsert()
     {
         $connection = $this->_entityManager->getConnection();
         $tableName = strtoupper("TABLE_" . substr(md5(__CLASS__ . ':' . __FUNCTION__), 0, 12));
@@ -35,7 +35,7 @@ class TransactionTest extends AbstractIntegrationTest
         $this->assertSame(42, $value);
     }
 
-    public function testCanSuccessfullyCommitMultipleTransactions()
+    public function testCanSuccessfullyCommitMultipleTransactionsForInsert()
     {
         $connection = $this->_entityManager->getConnection();
         $tableName = strtoupper("TABLE_" . substr(md5(__CLASS__ . ':' . __FUNCTION__), 0, 12));
@@ -67,7 +67,7 @@ class TransactionTest extends AbstractIntegrationTest
         $this->assertSame(3, $count, "Count, 1st");
     }
 
-    public function testCanSuccessfullyRollbackASingleTransaction()
+    public function testCanSuccessfullyRollbackASingleTransactionForInsert()
     {
         $connection = $this->_entityManager->getConnection();
         $tableName = strtoupper("TABLE_" . substr(md5(__CLASS__ . ':' . __FUNCTION__), 0, 12));
@@ -80,7 +80,7 @@ class TransactionTest extends AbstractIntegrationTest
         $this->assertFalse($value);
     }
 
-    public function testCanSuccessfullyRollbackMultipleTransactions()
+    public function testCanSuccessfullyRollbackMultipleTransactionsForInsert()
     {
         $connection = $this->_entityManager->getConnection();
         $tableName = strtoupper("TABLE_" . substr(md5(__CLASS__ . ':' . __FUNCTION__), 0, 12));
@@ -112,7 +112,7 @@ class TransactionTest extends AbstractIntegrationTest
         $this->assertSame(0, $count, "Count, 1st");
     }
 
-    public function testCanSuccessfullyCommitAndRollbackMultipleTransactions()
+    public function testCanSuccessfullyCommitAndRollbackMultipleTransactionsForInsert()
     {
         $connection = $this->_entityManager->getConnection();
         $tableName = strtoupper("TABLE_" . substr(md5(__CLASS__ . ':' . __FUNCTION__), 0, 12));
