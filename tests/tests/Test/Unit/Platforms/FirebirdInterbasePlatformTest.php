@@ -247,7 +247,7 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
     {
         return [
             ["foo", "foo", null, null],
-            ["foo ROWS 3", "foo", 3, null],
+            ["foo ROWS 1 TO 3", "foo", 3, null],
             ["foo ROWS 4 TO 9000000000000000000", "foo", null, 3],
             ["foo ROWS 4 TO 6", "foo", 3, 3],
         ];
@@ -589,14 +589,18 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
             ->getMockBuilder('Doctrine\DBAL\Schema\Identifier')
             ->disableOriginalConstructor()
             ->getMock();
-        $name
-            ->expects($this->any())
-            ->method('getQuotedName')
-            ->willReturn("'foo'");
         $diff
             ->expects($this->any())
             ->method('getName')
             ->willReturn($name);
+        $diff
+            ->expects($this->any())
+            ->method('getNewName')
+            ->willReturn($name);
+        $name
+            ->expects($this->any())
+            ->method('getQuotedName')
+            ->willReturn("'foo'");
         $diff->addedColumns = [];
         $diff->removedColumns = [];
         $diff->changedColumns = [];
@@ -623,6 +627,10 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
         $diff
             ->expects($this->any())
             ->method('getName')
+            ->willReturn($name);
+        $diff
+            ->expects($this->any())
+            ->method('getNewName')
             ->willReturn($name);
         $column = $this
             ->getMockBuilder('Doctrine\DBAL\Schema\Column')
@@ -676,6 +684,10 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
             ->expects($this->any())
             ->method('getName')
             ->willReturn($name);
+        $diff
+            ->expects($this->any())
+            ->method('getNewName')
+            ->willReturn($name);
         $column = $this
             ->getMockBuilder('Doctrine\DBAL\Schema\Column')
             ->disableOriginalConstructor()
@@ -727,6 +739,10 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
         $diff
             ->expects($this->any())
             ->method('getName')
+            ->willReturn($name);
+        $diff
+            ->expects($this->any())
+            ->method('getNewName')
             ->willReturn($name);
         $column = $this
             ->getMockBuilder('Doctrine\DBAL\Schema\Column')
@@ -808,6 +824,10 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
         $diff
             ->expects($this->any())
             ->method('getName')
+            ->willReturn($name);
+        $diff
+            ->expects($this->any())
+            ->method('getNewName')
             ->willReturn($name);
         $column = $this
             ->getMockBuilder('Doctrine\DBAL\Schema\Column')

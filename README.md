@@ -1,7 +1,7 @@
 Doctrine Firebird driver
 ---------------------------
 
-Firebird driver for the [Doctrine DBAL](https://github.com/doctrine/dbal).
+Firebird driver for the [Doctrine DBAL](https://github.com/doctrine/dbal) ([v2.7.*](https://packagist.org/packages/doctrine/orm#v2.7.0)).
 
 This library is completely separate (i.e. abstracted away) from the core Doctrine DBAL library. I.e. it is fully a **plug-in**.
 
@@ -16,7 +16,7 @@ To utilize this library in your application code, the following is required:
   - [ibase](http://php.net/manual/en/book.ibase.php)
   - [mbstring](http://php.net/manual/en/book.mbstring.php)
   - xml
-- [doctrine/dbal: >=2.6](https://packagist.org/packages/doctrine/dbal#v2.6.0)
+- [doctrine/dbal: ^2.9.3](https://packagist.org/packages/doctrine/dbal#v2.9.3)
 
 <sup>1</sup> Only needed on remote/guest OS, e.g. a remote Ubuntu server or a VM installed through Docker, Vagrant, or XAMPP.
 
@@ -49,11 +49,11 @@ Via Github:
 
 For example of configuration in PHP, see [`tests/tests/Test/Integration/AbstractIntegrationTest.php`](tests/tests/Test/Integration/AbstractIntegrationTest.php) (in the method `setUp`).
 
-Additional help may be found at: https://www.doctrine-project.org/projects/doctrine-orm/en/2.6/index.html
+Additional help may be found at: https://www.doctrine-project.org/projects/doctrine-orm/en/2.7/index.html
 
 ### Symfony configuration (YAML)
 
-This driver may be used like any other Doctrine DBAL driver in [Symfony](https://symfony.com/). However, the `driver_class` option must be specified instead of simply `driver`. This is due to the driver not being part of the [core Doctrine DBAL library](https://github.com/doctrine/dbal).
+This driver may be used like any other Doctrine DBAL driver in [Symfony](https://symfony.com/), e.g. with [doctrine/doctrine-bundle](https://packagist.org/packages/doctrine/doctrine-bundle). However, the `driver_class` option must be specified instead of simply `driver`. This is due to the driver not being part of the [core Doctrine DBAL library](https://github.com/doctrine/dbal).
 
 Sample YAML configuration:
 
@@ -129,7 +129,7 @@ https://github.com/upmedia
 
 ### https://github.com/doctrine/dbal
 
-Fundamental Doctrine DBAL implementation. The driver and platform logic in this library is based on other implementations in the core library, largely [`\Doctrine\DBAL\Driver\PDOOracle\Driver`](https://github.com/doctrine/dbal/blob/v2.6.0/lib/Doctrine/DBAL/Driver/PDOOracle/Driver.php) and [`\Doctrine\DBAL\Platforms\OraclePlatform`](https://github.com/doctrine/dbal/blob/v2.6.0/lib/Doctrine/DBAL/Platforms/OraclePlatform.php), and their respective parent classes.
+Fundamental Doctrine DBAL implementation. The driver and platform logic in this library is based on other implementations in the core library, largely [`\Doctrine\DBAL\Driver\PDOOracle\Driver`](https://github.com/doctrine/dbal/blob/v2.9.3/lib/Doctrine/DBAL/Driver/PDOOracle/Driver.php) and [`\Doctrine\DBAL\Platforms\OraclePlatform`](https://github.com/doctrine/dbal/blob/v2.9.3/lib/Doctrine/DBAL/Platforms/OraclePlatform.php), and their respective parent classes.
 
 ### https://github.com/helicon-os/doctrine-dbal
 

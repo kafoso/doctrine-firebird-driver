@@ -84,7 +84,7 @@ class AlterColumnsTest extends AbstractIntegrationTest
                     break;
             }
             if (is_string($default)) {
-                $default = "'{$default}'";
+                $default = "'" . str_replace("'", "''", $default) . "'";
             }
             $expected = "DEFAULT {$default}";
             $this->assertSame($expected, $row['RDB$DEFAULT_SOURCE_01'], "Invalid default. SQL: " . self::statementArrayToText($statements));

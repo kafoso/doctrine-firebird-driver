@@ -351,7 +351,7 @@ class FirebirdInterbasePlatform extends AbstractPlatform
 
         if ($offset === NULL) {
             // A limit is specified, but no offset, so the syntax ROWS <n> is used
-            return $query . ' ROWS ' . (int) $limit;
+            return $query . ' ROWS 1 TO ' . (int) $limit;
         }
         $from = (int) $offset + 1; // Firebird starts the offset at 1
         if ($limit === NULL) {
@@ -913,7 +913,9 @@ class FirebirdInterbasePlatform extends AbstractPlatform
             }
 
             $sql = array_merge(
-                $this->getPreAlterTableIndexForeignKeySQL($diff), $sql, $this->getPostAlterTableIndexForeignKeySQL($diff)
+                $this->getPreAlterTableIndexForeignKeySQL($diff),
+                $sql,
+                $this->getPostAlterTableIndexForeignKeySQL($diff)
             );
         }
 
