@@ -11,7 +11,7 @@ To utilize this library in your application code, the following is required:
 
 - [Firebird](https://firebirdsql.org/) version 2.5.*
   - Version 3.* is not supported. You are very welcome to provide a pull request for this.
-- PHP >= 7.1
+- PHP >= 7.2
 - PHP extensions<sup>1</sup>:
   - [ibase](http://php.net/manual/en/book.ibase.php)
   - [mbstring](http://php.net/manual/en/book.mbstring.php)
@@ -111,7 +111,7 @@ Due to the database being created by the PHP bootstrap script on the fly, `root`
 6. `cd /var/git/kafoso/doctrine-firebird-driver`
 7. `composer install`<sup>1</sup>
 8. `cd /var/git/kafoso/doctrine-firebird-driver/tests`
-9. `php ../bin/phpunit tests`
+9. `../bin/phpunit tests`
 
 <sup>1</sup> Composer will say you shouldn't run it as root/super user. This is techically true, but it's fine in the VM.
 
