@@ -2,4 +2,4 @@
 
 add-apt-repository ppa:ondrej/php -y
 apt-get update
-apt-get install -y php7.1-fpm php7.1-xml php7.1-mbstring php7.1-interbase
+apt-get install -y php7.2-fpm php7.2-xml php7.2-mbstring php7.2-interbase

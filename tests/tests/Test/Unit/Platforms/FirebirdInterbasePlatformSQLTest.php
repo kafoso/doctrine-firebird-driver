@@ -219,7 +219,7 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
     public function testModifyLimitQueryWithEmptyOffset()
     {
         $sql = $this->_platform->modifyLimitQuery('SELECT * FROM user', 10);
-        $this->assertEquals('SELECT * FROM user ROWS 10', $sql);
+        $this->assertEquals('SELECT * FROM user ROWS 1 TO 10', $sql);
     }
 
     public function testModifyLimitQueryWithEmptyLimit()
@@ -231,13 +231,13 @@ class FirebirdInterbasePlatformSQLTest extends AbstractFirebirdInterbasePlatform
     public function testModifyLimitQueryWithAscOrderBy()
     {
         $sql = $this->_platform->modifyLimitQuery('SELECT * FROM user ORDER BY username ASC', 10);
-        $this->assertEquals('SELECT * FROM user ORDER BY username ASC ROWS 10', $sql);
+        $this->assertEquals('SELECT * FROM user ORDER BY username ASC ROWS 1 TO 10', $sql);
     }
 
     public function testModifyLimitQueryWithDescOrderBy()
     {
         $sql = $this->_platform->modifyLimitQuery('SELECT * FROM user ORDER BY username DESC', 10);
-        $this->assertEquals('SELECT * FROM user ORDER BY username DESC ROWS 10', $sql);
+        $this->assertEquals('SELECT * FROM user ORDER BY username DESC ROWS 1 TO 10', $sql);
     }
 
     public function testGenerateTableWithAutoincrement()

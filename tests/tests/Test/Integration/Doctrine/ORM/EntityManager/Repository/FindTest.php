@@ -5,6 +5,9 @@ use Doctrine\Common\Collections\Collection;
 use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
 use Kafoso\DoctrineFirebirdDriver\Test\Resource\Entity;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class FindTest extends AbstractIntegrationTest
 {
     public function testFindAlbum()

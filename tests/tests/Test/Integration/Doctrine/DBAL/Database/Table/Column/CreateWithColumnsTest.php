@@ -6,6 +6,9 @@ use Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Statement;
 use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
 use Kafoso\DoctrineFirebirdDriver\Schema\FirebirdInterbaseSchemaManager;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class CreateWithColumnsTest extends AbstractIntegrationTest
 {
     /**
@@ -62,7 +65,7 @@ class CreateWithColumnsTest extends AbstractIntegrationTest
                     break;
             }
             if (is_string($default)) {
-                $default = "'{$default}'";
+                $default = "'" . str_replace("'", "''", $default) . "'";
             }
             $expected = "DEFAULT {$default}";
             $this->assertSame($expected, $row['RDB$DEFAULT_SOURCE_01'], "Invalid default.");

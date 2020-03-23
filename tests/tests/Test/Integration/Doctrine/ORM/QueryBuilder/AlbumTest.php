@@ -166,7 +166,7 @@ class AlbumTest extends AbstractIntegrationTest
         $expectedDQL .= " WHERE album.id > 0";
         $this->assertSame($expectedDQL, $qb->getQuery()->getDQL());
         $expectedSQL = "SELECT a0_.id AS ID_0, a0_.timeCreated AS TIMECREATED_1, a0_.name AS NAME_2,";
-        $expectedSQL .= " a0_.artist_id AS ARTIST_ID_3 FROM ALBUM a0_ WHERE a0_.id > 0 ROWS 1";
+        $expectedSQL .= " a0_.artist_id AS ARTIST_ID_3 FROM ALBUM a0_ WHERE a0_.id > 0 ROWS 1 TO 1";
         $this->assertSame($expectedSQL, $qb->getQuery()->getSQL());
         $albums = $qb->getQuery()->getResult();
         $this->assertInternalType('array', $albums);

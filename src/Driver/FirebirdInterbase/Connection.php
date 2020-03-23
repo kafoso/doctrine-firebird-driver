@@ -261,30 +261,29 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
     }
 
     /**
-     * @param int $isolationLevel
-     * @param int $timeout
-     * @return string
+     * @throws Exception
      */
-    public function getStartTransactionSql($isolationLevel, $timeout = 5)
+    public function getStartTransactionSql(int $isolationLevel): string
     {
         $result = "";
         switch ($isolationLevel) {
-            case \Doctrine\DBAL\Connection::TRANSACTION_READ_UNCOMMITTED: {
-                    $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL READ COMMITTED RECORD_VERSION';
-                    break;
-                }
-            case \Doctrine\DBAL\Connection::TRANSACTION_READ_COMMITTED: {
-                    $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL READ COMMITTED RECORD_VERSION';
-                    break;
-                }
-            case \Doctrine\DBAL\Connection::TRANSACTION_REPEATABLE_READ: {
-                    $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL SNAPSHOT ';
-                    break;
-                }
-            case \Doctrine\DBAL\Connection::TRANSACTION_SERIALIZABLE: {
-                    $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL SNAPSHOT TABLE STABILITY';
-                    break;
-                }
+            case \Doctrine\DBAL\Connection::TRANSACTION_READ_UNCOMMITTED:
+                $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL READ COMMITTED RECORD_VERSION';
+                break;
+            case \Doctrine\DBAL\Connection::TRANSACTION_READ_COMMITTED:
+                $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL READ COMMITTED RECORD_VERSION';
+                break;
+            case \Doctrine\DBAL\Connection::TRANSACTION_REPEATABLE_READ:
+                $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL SNAPSHOT';
+                break;
+            case \Doctrine\DBAL\Connection::TRANSACTION_SERIALIZABLE:
+                $result .= 'SET TRANSACTION READ WRITE ISOLATION LEVEL SNAPSHOT TABLE STABILITY';
+                break;
+            default:
+                throw new Exception(sprintf(
+                    "Isolation level %s is not supported",
+                    ValueFormatter::cast($isolationLevel)
+                ));
         }
         if (($this->attrDcTransWait > 0)) {
             $result .= ' WAIT LOCK TIMEOUT ' . $this->attrDcTransWait;
@@ -456,7 +455,7 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
      *
      * @throws Exception
      */
-    protected function checkLastApiCall()
+    public function checkLastApiCall()
     {
         $lastError = $this->errorInfo();
         if (isset($lastError['code']) && $lastError['code']) {
@@ -467,6 +466,7 @@ class Connection implements ConnectionInterface, ServerInfoAwareConnection
     /**
      * @param bool $commitDefaultTransaction
      * @return resource The ibase transaction.
+     * @throws Exception
      */
     protected function createTransaction($commitDefaultTransaction = true)
     {

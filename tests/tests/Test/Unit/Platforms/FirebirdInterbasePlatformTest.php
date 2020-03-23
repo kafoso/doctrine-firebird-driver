@@ -247,7 +247,7 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
     {
         return [
             ["foo", "foo", null, null],
-            ["foo ROWS 3", "foo", 3, null],
+            ["foo ROWS 1 TO 3", "foo", 3, null],
             ["foo ROWS 4 TO 9000000000000000000", "foo", null, 3],
             ["foo ROWS 4 TO 6", "foo", 3, 3],
         ];
@@ -589,14 +589,18 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
             ->getMockBuilder('Doctrine\DBAL\Schema\Identifier')
             ->disableOriginalConstructor()
             ->getMock();
-        $name
-            ->expects($this->any())
-            ->method('getQuotedName')
-            ->willReturn("'foo'");
         $diff
             ->expects($this->any())
             ->method('getName')
             ->willReturn($name);
+        $diff
+            ->expects($this->any())
+            ->method('getNewName')
+            ->willReturn($name);
+        $name
+            ->expects($this->any())
+            ->method('getQuotedName')
+            ->willReturn("'foo'");
         $diff->addedColumns = [];
         $diff->removedColumns = [];
         $diff->changedColumns = [];
@@ -623,6 +627,10 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
         $diff
             ->expects($this->any())
             ->method('getName')
+            ->willReturn($name);
+        $diff
+            ->expects($this->any())
+            ->method('getNewName')
             ->willReturn($name);
         $column = $this
             ->getMockBuilder('Doctrine\DBAL\Schema\Column')
@@ -676,6 +684,10 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
             ->expects($this->any())
             ->method('getName')
             ->willReturn($name);
+        $diff
+            ->expects($this->any())
+            ->method('getNewName')
+            ->willReturn($name);
         $column = $this
             ->getMockBuilder('Doctrine\DBAL\Schema\Column')
             ->disableOriginalConstructor()
@@ -727,6 +739,10 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
         $diff
             ->expects($this->any())
             ->method('getName')
+            ->willReturn($name);
+        $diff
+            ->expects($this->any())
+            ->method('getNewName')
             ->willReturn($name);
         $column = $this
             ->getMockBuilder('Doctrine\DBAL\Schema\Column')
@@ -808,6 +824,10 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
         $diff
             ->expects($this->any())
             ->method('getName')
+            ->willReturn($name);
+        $diff
+            ->expects($this->any())
+            ->method('getNewName')
             ->willReturn($name);
         $column = $this
             ->getMockBuilder('Doctrine\DBAL\Schema\Column')
@@ -1089,24 +1109,27 @@ class FirebirdInterbasePlatformTest extends AbstractFirebirdInterbasePlatformTes
     {
         $found = $this->_platform->getListTableColumnsSQL('foo');
         $this->assertInternalType("string", $found);
-        $this->assertStringStartsWith("SELECT TRIM(r.RDB\$FIELD_NAME) AS \"FIELD_NAME\",".PHP_EOL, ltrim($found));
-        $this->assertContains(" FROM RDB\$RELATION_FIELDS r".PHP_EOL, $found);
+        $foundNormalized = preg_replace('/\r\n|\r/', "\n", ltrim($found));
+        $this->assertStringStartsWith("SELECT TRIM(r.RDB\$FIELD_NAME) AS \"FIELD_NAME\",\n", $foundNormalized);
+        $this->assertContains(" FROM RDB\$RELATION_FIELDS r\n", $foundNormalized);
     }
 
     public function testGetListTableForeignKeysSQL()
     {
         $found = $this->_platform->getListTableForeignKeysSQL('foo');
         $this->assertInternalType("string", $found);
-        $this->assertStringStartsWith("SELECT TRIM(rc.RDB\$CONSTRAINT_NAME) AS constraint_name,".PHP_EOL, ltrim($found));
-        $this->assertContains(" FROM RDB\$INDEX_SEGMENTS s".PHP_EOL, $found);
+        $foundNormalized = preg_replace('/\r\n|\r/', "\n", ltrim($found));
+        $this->assertStringStartsWith("SELECT TRIM(rc.RDB\$CONSTRAINT_NAME) AS constraint_name,\n", $foundNormalized);
+        $this->assertContains(" FROM RDB\$INDEX_SEGMENTS s\n", $foundNormalized);
     }
 
     public function testGetListTableIndexesSQL()
     {
         $found = $this->_platform->getListTableIndexesSQL('foo');
         $this->assertInternalType("string", $found);
-        $this->assertStringStartsWith("SELECT".PHP_EOL, ltrim($found));
-        $this->assertContains("FROM RDB\$INDEX_SEGMENTS".PHP_EOL, $found);
+        $foundNormalized = preg_replace('/\r\n|\r/', "\n", ltrim($found));
+        $this->assertStringStartsWith("SELECT\n", $foundNormalized);
+        $this->assertContains("FROM RDB\$INDEX_SEGMENTS\n", $foundNormalized);
     }
 
     public function testGetSQLResultCasing()

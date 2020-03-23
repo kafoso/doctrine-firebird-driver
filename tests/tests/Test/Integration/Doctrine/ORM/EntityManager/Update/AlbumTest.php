@@ -4,6 +4,9 @@ namespace Kafoso\DoctrineFirebirdDriver\Test\Integration\Doctrine\EntityManager\
 use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
 use Kafoso\DoctrineFirebirdDriver\Test\Resource\Entity;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class AlbumTest extends AbstractIntegrationTest
 {
     public function testCanUpdate()

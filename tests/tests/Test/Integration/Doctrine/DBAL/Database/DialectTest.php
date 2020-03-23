@@ -97,7 +97,7 @@ class DialectTest extends AbstractIntegrationTest
             $this->assertStringStartsWith('Error -104: An exception occurred while executing ', $t->getMessage());
             $this->assertInternalType("object", $t->getPrevious());
             $this->assertSame('Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Exception', get_class($t->getPrevious()));
-            $this->assertStringStartsWith('Dynamic SQL Error SQL error code = -104 Client SQL dialect 1 does not support reference to TIME datatype', $t->getPrevious()->getMessage());
+            $this->assertStringStartsWith('Failed to perform `doDirectExec`: Dynamic SQL Error SQL error code = -104 Client SQL dialect 1 does not support reference to TIME datatype', $t->getPrevious()->getMessage());
         }
 
         $stmt = $connection->prepare("SELECT a.\"ID\" FROM Album AS a");
@@ -108,7 +108,7 @@ class DialectTest extends AbstractIntegrationTest
             $this->assertStringStartsWith('Error -104: An exception occurred while executing \'', $t->getMessage());
             $this->assertInternalType("object", $t->getPrevious());
             $this->assertSame('Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Exception', get_class($t->getPrevious()));
-            $this->assertStringStartsWith('Dynamic SQL Error SQL error code = -104 Token unknown - line 1, column 10 "ID"', $t->getPrevious()->getMessage());
+            $this->assertStringStartsWith('Failed to perform `doDirectExec`: Dynamic SQL Error SQL error code = -104 Token unknown - line 1, column 10 "ID"', $t->getPrevious()->getMessage());
         }
 
         $stmt = $connection->prepare("SELECT 1/3 AS NUMBER FROM RDB\$DATABASE");
@@ -140,7 +140,7 @@ class DialectTest extends AbstractIntegrationTest
             $this->assertStringStartsWith('Error -104: An exception occurred while executing \'', $t->getMessage());
             $this->assertInternalType("object", $t->getPrevious());
             $this->assertSame('Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Exception', get_class($t->getPrevious()));
-            $this->assertStringStartsWith('Dynamic SQL Error SQL error code = -104 DATE must be changed to TIMESTAMP', $t->getPrevious()->getMessage());
+            $this->assertStringStartsWith('Failed to perform `doDirectExec`: Dynamic SQL Error SQL error code = -104 DATE must be changed to TIMESTAMP', $t->getPrevious()->getMessage());
         }
 
         $stmt = $connection->prepare("SELECT CAST(CAST('2018-01-01 00:00:00' AS TIMESTAMP) AS CHAR(25)) AS TXT FROM RDB\$DATABASE");
@@ -157,7 +157,7 @@ class DialectTest extends AbstractIntegrationTest
             $this->assertStringStartsWith('Error -104: An exception occurred while executing ', $t->getMessage());
             $this->assertInternalType("object", $t->getPrevious());
             $this->assertSame('Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Exception', get_class($t->getPrevious()));
-            $this->assertStringStartsWith('Dynamic SQL Error SQL error code = -104 Client SQL dialect 1 does not support reference to TIME datatype', $t->getPrevious()->getMessage());
+            $this->assertStringStartsWith('Failed to perform `doDirectExec`: Dynamic SQL Error SQL error code = -104 Client SQL dialect 1 does not support reference to TIME datatype', $t->getPrevious()->getMessage());
         }
 
         $stmt = $connection->prepare("SELECT a.\"ID\" FROM Album AS a");
@@ -168,7 +168,7 @@ class DialectTest extends AbstractIntegrationTest
             $this->assertStringStartsWith('Error -104: An exception occurred while executing \'', $t->getMessage());
             $this->assertInternalType("object", $t->getPrevious());
             $this->assertSame('Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Exception', get_class($t->getPrevious()));
-            $this->assertStringStartsWith('Dynamic SQL Error SQL error code = -104 a string constant is delimited by double quotes', $t->getPrevious()->getMessage());
+            $this->assertStringStartsWith('Failed to perform `doDirectExec`: Dynamic SQL Error SQL error code = -104 a string constant is delimited by double quotes', $t->getPrevious()->getMessage());
         }
 
         $stmt = $connection->prepare("SELECT 1/3 AS NUMBER FROM RDB\$DATABASE");
