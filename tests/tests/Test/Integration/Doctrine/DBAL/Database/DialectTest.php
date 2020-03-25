@@ -19,52 +19,50 @@ class DialectTest extends AbstractIntegrationTest
 
     }
 
-    public function testDialect0And3()
+    public function testDialect3()
     {
-        foreach ([0,3] as $dialect) {
-            $doctrineConfiguration = static::getSetUpDoctrineConfiguration();
-            $configurationArray = static::getSetUpDoctrineConfigurationArray([
-                'dialect' => 3,
-            ]);
-            static::installFirebirdDatabase($configurationArray);
-            $entityManager = static::createEntityManager($doctrineConfiguration, $configurationArray);
-            $connection = $entityManager->getConnection();
+        $doctrineConfiguration = static::getSetUpDoctrineConfiguration();
+        $configurationArray = static::getSetUpDoctrineConfigurationArray([
+            'dialect' => 3,
+        ]);
+        static::installFirebirdDatabase($configurationArray);
+        $entityManager = static::createEntityManager($doctrineConfiguration, $configurationArray);
+        $connection = $entityManager->getConnection();
 
-            $stmt = $connection->prepare("SELECT CAST(CAST('2018-01-01' AS DATE) AS CHAR(25)) AS TXT FROM RDB\$DATABASE");
-            $stmt->execute();
-            $result = $stmt->fetch();
-            $this->assertSame(100, strlen($result['TXT']));
-            $this->assertStringStartsWith("2018-01-01", $result['TXT']);
+        $stmt = $connection->prepare("SELECT CAST(CAST('2018-01-01' AS DATE) AS CHAR(25)) AS TXT FROM RDB\$DATABASE");
+        $stmt->execute();
+        $result = $stmt->fetch();
+        $this->assertSame(100, strlen($result['TXT']));
+        $this->assertStringStartsWith("2018-01-01", $result['TXT']);
 
-            $stmt = $connection->prepare("SELECT CAST(CAST('2018-01-01 00:00:00' AS TIMESTAMP) AS CHAR(25)) AS TXT FROM RDB\$DATABASE");
-            $stmt->execute();
-            $result = $stmt->fetch();
-            $this->assertSame(100, strlen($result['TXT']));
-            $this->assertSame("2018-01-01 00:00:00.0000", rtrim($result['TXT']));
+        $stmt = $connection->prepare("SELECT CAST(CAST('2018-01-01 00:00:00' AS TIMESTAMP) AS CHAR(25)) AS TXT FROM RDB\$DATABASE");
+        $stmt->execute();
+        $result = $stmt->fetch();
+        $this->assertSame(100, strlen($result['TXT']));
+        $this->assertSame("2018-01-01 00:00:00.0000", rtrim($result['TXT']));
 
-            $stmt = $connection->prepare("SELECT CAST(CAST('00:00:00' AS TIME) AS CHAR(25)) AS TXT FROM RDB\$DATABASE");
-            $stmt->execute();
-            $result = $stmt->fetch();
-            $this->assertSame(100, strlen($result['TXT']));
-            $this->assertSame("00:00:00.0000", rtrim($result['TXT']));
+        $stmt = $connection->prepare("SELECT CAST(CAST('00:00:00' AS TIME) AS CHAR(25)) AS TXT FROM RDB\$DATABASE");
+        $stmt->execute();
+        $result = $stmt->fetch();
+        $this->assertSame(100, strlen($result['TXT']));
+        $this->assertSame("00:00:00.0000", rtrim($result['TXT']));
 
-            $stmt = $connection->prepare("SELECT a.\"ID\" FROM Album AS a");
-            $stmt->execute();
-            $result = $stmt->fetch();
-            $this->assertInternalType("array", $result);
-            $this->assertArrayHasKey("ID", $result);
-            $this->assertSame(1, $result["ID"]);
+        $stmt = $connection->prepare("SELECT a.\"ID\" FROM Album AS a");
+        $stmt->execute();
+        $result = $stmt->fetch();
+        $this->assertInternalType("array", $result);
+        $this->assertArrayHasKey("ID", $result);
+        $this->assertSame(1, $result["ID"]);
 
-            $stmt = $connection->prepare("SELECT 1/3 AS NUMBER FROM RDB\$DATABASE");
-            $stmt->execute();
-            $result = $stmt->fetch();
-            $this->assertInternalType("array", $result);
-            $this->assertArrayHasKey("NUMBER", $result);
-            $this->assertInternalType("integer", $result["NUMBER"]);
-            $this->assertSame(0, $result["NUMBER"]);
+        $stmt = $connection->prepare("SELECT 1/3 AS NUMBER FROM RDB\$DATABASE");
+        $stmt->execute();
+        $result = $stmt->fetch();
+        $this->assertInternalType("array", $result);
+        $this->assertArrayHasKey("NUMBER", $result);
+        $this->assertInternalType("integer", $result["NUMBER"]);
+        $this->assertSame(0, $result["NUMBER"]);
 
-            $entityManager->getConnection()->close();
-        }
+        $entityManager->getConnection()->close();
     }
 
     public function testDialect1()
