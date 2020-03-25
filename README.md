@@ -27,9 +27,9 @@ If this is not a concern for you and you prefer the driver to use the `interbase
 - Support for last insert id. The `pdo-firebird` extension doesn't support this natively. In 2.7 it is implemented by using a query, but it requires the name of a sequence as an argument. Not sure if implementing it in PDO this way would be much of a win.
 - Support for different transaction isolation levels. Firebird does them a bit differently from other RDBMS implementations, and PDO doesn't seem to expect that, thus workarounds are needed. It appears we'd have to handle transactions on our side without relying on PDO.
 - Transaction lock timeouts and waiting. Again, to do this, we would have to handle transactions ourselves.
-- Support for Firebird SQL dialects. The underlying PDO driver claims to support dialects 1 and 3, but tests for dialect 1 just kept failing.
 - Autocommitting changes from last queries during object destruction, if they were not made within an explicit transaction. Again, the test just kept failing and both my patience and time were running out.
 - Quoting queries without calling the constructor first. That's just not how PDO operates, and likely for a good reason.
+- Different Firebird SQL dialects are only supported with PHP 7.4 and up (this was only implemented in ext-pdo-firebird [in 7.4](http://docs.php.net/manual/en/ref.pdo-firebird.connection.php)).
 
 # License & Disclaimer
 
