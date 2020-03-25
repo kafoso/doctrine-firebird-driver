@@ -30,7 +30,7 @@
     "require": {
         "php": ">=7.2",
         "ext-pdo": "*",
-        "ext-pdo-firebase": "*",
+        "ext-pdo_firebird": "*",
         "doctrine/dbal": "^2.9.3",
         "doctrine/orm": "2.7.*"
     },
