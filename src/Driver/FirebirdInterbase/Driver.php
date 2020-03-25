@@ -3,6 +3,7 @@ namespace Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase;
 
 use Doctrine\DBAL\DBALException;
 use Kafoso\DoctrineFirebirdDriver\Driver\AbstractFirebirdInterbaseDriver;
+use PDOException;
 
 class Driver extends AbstractFirebirdInterbaseDriver
 {
@@ -11,15 +12,14 @@ class Driver extends AbstractFirebirdInterbaseDriver
      */
     public function connect(array $params, $username = null, $password = null, array $driverOptions = array())
     {
-        $this->setDriverOptions($driverOptions);
         try {
             return new Connection(
-                $params,
+                $this->constructPdoDsn($params),
                 $username,
                 $password,
-                $this->getDriverOptions() // Sanitized
+                $driverOptions
             );
-        } catch (Exception $e) {
+        } catch (PDOException $e) {
             throw DBALException::driverException($this, $e);
         }
     }
@@ -30,5 +30,40 @@ class Driver extends AbstractFirebirdInterbaseDriver
     public function getName()
     {
         return 'FirebirdInterbase';
+    }
+
+    /**
+     * Constructs the Firebird PDO DSN.
+     *
+     * @param mixed[] $params
+     *
+     * @return string The DSN.
+     */
+    protected function constructPdoDsn(array $params)
+    {
+        $dsn = 'firebird:dbname=';
+        if (isset($params['host']) && $params['host'] !== '') {
+            $dsn .= $params['host'];
+
+            if (isset($params['port']) && $params['port'] !== '') {
+                $dsn .= '/' . $params['port'];
+            }
+
+            $dsn .= ':';
+        }
+        if (isset($params['dbname'])) {
+            $dsn .= $params['dbname'];
+        }
+        if (isset($params['charset'])) {
+            $dsn .= ';charset=' . $params['charset'];
+        }
+        if (isset($params['role'])) {
+            $dsn .= ';role=' . $params['role'];
+        }
+        if (isset($params['dialect'])) {
+            $dsn .= ';dialect=' . $params['dialect'];
+        }
+
+        return $dsn;
     }
 }

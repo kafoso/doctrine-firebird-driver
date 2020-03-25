@@ -1,8 +1,8 @@
 <?php
 namespace Kafoso\DoctrineFirebirdDriver\Test\Integration\Doctrine\DBAL\Database\Table;
 
+use Doctrine\DBAL\Driver\PDOStatement;
 use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
-use Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Statement;
 
 /**
  * @runTestsInSeparateProcesses
@@ -22,7 +22,7 @@ class CreateTest extends AbstractIntegrationTest
         }
         $sql = "SELECT 1 FROM RDB\$RELATIONS WHERE RDB\$RELATION_NAME = '{$tableName}'";
         $result = $connection->query($sql);
-        $this->assertInstanceOf(Statement::class, $result);
+        $this->assertInstanceOf(PDOStatement::class, $result);
         $this->assertSame(1, $result->fetchColumn(), "Table creation failure. SQL: " . self::statementArrayToText($statements));
     }
 
@@ -48,7 +48,7 @@ class CreateTest extends AbstractIntegrationTest
             AND RC.RDB\$RELATION_NAME = '{$tableName}'"
         );
         $result = $connection->query($sql);
-        $this->assertInstanceOf(Statement::class, $result);
+        $this->assertInstanceOf(PDOStatement::class, $result);
         $this->assertSame(1, $result->fetchColumn(), "Primary key \"id\" not found");
     }
 
@@ -68,14 +68,14 @@ class CreateTest extends AbstractIntegrationTest
         $triggerName = "{$tableName}_D2IT";
         $sql = "SELECT 1 FROM RDB\$TRIGGERS WHERE RDB\$TRIGGER_NAME = '{$triggerName}'";
         $result = $connection->query($sql);
-        $this->assertInstanceOf(Statement::class, $result);
+        $this->assertInstanceOf(PDOStatement::class, $result);
         $this->assertSame(1, $result->fetchColumn(), "Trigger creation failure. SQL: " . self::statementArrayToText($statements));
 
         $sequenceName = "{$tableName}_D2IS";
         foreach ([1, 2] as $id) {
             $sql = "SELECT NEXT VALUE FOR {$sequenceName} FROM RDB\$DATABASE;";
             $result = $connection->query($sql);
-            $this->assertInstanceOf(Statement::class, $result);
+            $this->assertInstanceOf(PDOStatement::class, $result);
             $this->assertSame($id, $result->fetchColumn(), "Incorrect autoincrement value");
         }
     }
@@ -107,7 +107,7 @@ class CreateTest extends AbstractIntegrationTest
             AND SG.RDB\$FIELD_NAME = 'FOO'"
         );
         $result = $connection->query($sql);
-        $this->assertInstanceOf(Statement::class, $result);
+        $this->assertInstanceOf(PDOStatement::class, $result);
         $this->assertSame(1, $result->fetchColumn(), "Index creation failure. SQL: " . self::statementArrayToText($statements));
     }
 
@@ -138,7 +138,7 @@ class CreateTest extends AbstractIntegrationTest
             AND SG.RDB\$FIELD_NAME = 'FOO'"
         );
         $result = $connection->query($sql);
-        $this->assertInstanceOf(Statement::class, $result);
+        $this->assertInstanceOf(PDOStatement::class, $result);
         $this->assertSame(1, $result->fetchColumn(), "Unique index creation failure. SQL: " . self::statementArrayToText($statements));
     }
 
@@ -164,7 +164,7 @@ class CreateTest extends AbstractIntegrationTest
             AND RF.RDB\$DESCRIPTION = '{$comment}'"
         );
         $result = $connection->query($sql);
-        $this->assertInstanceOf(Statement::class, $result);
+        $this->assertInstanceOf(PDOStatement::class, $result);
         $this->assertSame(1, $result->fetchColumn(), "Comment creation failure. SQL: " . self::statementArrayToText($statements));
     }
 }

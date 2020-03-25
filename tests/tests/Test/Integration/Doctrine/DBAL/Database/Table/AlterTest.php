@@ -1,7 +1,7 @@
 <?php
 namespace Kafoso\DoctrineFirebirdDriver\Test\Integration\Doctrine\DBAL\Database\Table;
 
-use Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Statement;
+use Doctrine\DBAL\Driver\PDOStatement;
 use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
 use Kafoso\DoctrineFirebirdDriver\Schema\FirebirdInterbaseSchemaManager;
 
@@ -41,7 +41,7 @@ class AlterTest extends AbstractIntegrationTest
             AND F.RDB\$FIELD_TYPE = " . FirebirdInterbaseSchemaManager::META_FIELD_TYPE_VARCHAR
         );
         $result = $connection->query($sql);
-        $this->assertInstanceOf(Statement::class, $result);
+        $this->assertInstanceOf(PDOStatement::class, $result);
         $this->assertSame(1, $result->fetchColumn(), "Column change failed. SQL: " . self::statementArrayToText($statements));
     }
 }

@@ -8,20 +8,6 @@ use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
  */
 class TransactionTest extends AbstractIntegrationTest
 {
-    public function testWillAutoCommitBottomLevelTransaction()
-    {
-        $connection = $this->_entityManager->getConnection();
-        $tableName = strtoupper("TABLE_" . substr(md5(__CLASS__ . ':' . __FUNCTION__), 0, 12));
-        $connection->exec("CREATE TABLE {$tableName} (id INTEGER DEFAULT 0 NOT NULL)");
-        $connection->exec("INSERT INTO {$tableName} (id) VALUES (42)");
-        unset($connection);
-        $this->setUp();
-        $connection = $this->_entityManager->getConnection();
-        $result = $connection->query("SELECT id FROM {$tableName} WHERE id = 42");
-        $value = $result->fetchColumn();
-        $this->assertSame(42, $value);
-    }
-
     public function testCanSuccessfullyCommitASingleTransactionForInsert()
     {
         $connection = $this->_entityManager->getConnection();

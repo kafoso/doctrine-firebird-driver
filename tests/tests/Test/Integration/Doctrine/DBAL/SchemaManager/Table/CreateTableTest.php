@@ -2,12 +2,11 @@
 namespace Kafoso\DoctrineFirebirdDriver\Test\Integration\Doctrine\DBAL\SchemaManager\Table;
 
 use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
-use Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Statement;
 
 /**
  * @runTestsInSeparateProcesses
  */
-class CreateTest extends AbstractIntegrationTest
+class CreateTableTest extends AbstractIntegrationTest
 {
     public function testCreateTable()
     {

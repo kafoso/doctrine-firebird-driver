@@ -12,13 +12,24 @@ To utilize this library in your application code, the following is required:
 - [Firebird](https://firebirdsql.org/) version 2.5.*
   - Version 3.* is not supported. You are very welcome to provide a pull request for this.
 - PHP >= 7.2
-- PHP extensions<sup>1</sup>:
-  - [ibase](http://php.net/manual/en/book.ibase.php)
+- PHP extensions:
+  - [pdo](http://php.net/manual/en/book.pdo.php)
+  - [pdo-firebird](https://www.php.net/manual/en/ref.pdo-firebird.php)
   - [mbstring](http://php.net/manual/en/book.mbstring.php)
   - xml
 - [doctrine/dbal: ^2.9.3](https://packagist.org/packages/doctrine/dbal#v2.9.3)
 
-<sup>1</sup> Only needed on remote/guest OS, e.g. a remote Ubuntu server or a VM installed through Docker, Vagrant, or XAMPP.
+## On `pdo-firebird` vs `interbase`/`ibase`
+
+PDO was chosen because support for the `interbase` extension was dropped in PHP 7.4 and it was moved into PECL. However, as of March 2020, the [project on PECL](http://pecl.php.net/package/interbase) has had no releases yet (see issue #9).
+
+If this is not a concern for you and you prefer the driver to use the `interbase` PHP extension and `ibase_*` functions instead of PDO, have a look at the 2.7 branch of this repository. Admittedly, that branch has a couple extra features which aren't available in this branch (yet?). These are:
+- Support for last insert id. The `pdo-firebird` extension doesn't support this natively. In 2.7 it is implemented by using a query, but it requires the name of a sequence as an argument. Not sure if implementing it in PDO this way would be much of a win.
+- Support for different transaction isolation levels. Firebird does them a bit differently from other RDBMS implementations, and PDO doesn't seem to expect that, thus workarounds are needed. It appears we'd have to handle transactions on our side without relying on PDO.
+- Transaction lock timeouts and waiting. Again, to do this, we would have to handle transactions ourselves.
+- Support for Firebird SQL dialects. The underlying PDO driver claims to support dialects 1 and 3, but tests for dialect 1 just kept failing.
+- Autocommitting changes from last queries during object destruction, if they were not made within an explicit transaction. Again, the test just kept failing and both my patience and time were running out.
+- Quoting queries without calling the constructor first. That's just not how PDO operates, and likely for a good reason.
 
 # License & Disclaimer
 
@@ -124,6 +135,8 @@ https://github.com/kafoso<br>
 E-mail: soefritz@gmail.com
 - **Uffe Pedersen**<br>
 https://github.com/upmedia
+- **Rimas Kudelis**<br>
+https://github.com/rimas-kudelis
 
 ## Acknowledgements
 

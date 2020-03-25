@@ -9,7 +9,7 @@ use Kafoso\DoctrineFirebirdDriver\Test\Resource\Entity;
  */
 class AlbumTest extends AbstractIntegrationTest
 {
-    public function testCanDetatch()
+    public function testCanDetach()
     {
         $albumA = new Entity\Album("Foo");
         $this->assertNull($albumA->getId());

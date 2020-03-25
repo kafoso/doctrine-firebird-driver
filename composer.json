@@ -29,6 +29,8 @@
     },
     "require": {
         "php": ">=7.2",
+        "ext-pdo": "*",
+        "ext-pdo-firebase": "*",
         "doctrine/dbal": "^2.9.3",
         "doctrine/orm": "2.7.*"
     },
