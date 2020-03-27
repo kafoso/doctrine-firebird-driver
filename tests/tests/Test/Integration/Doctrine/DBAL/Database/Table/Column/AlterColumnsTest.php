@@ -1,11 +1,14 @@
 <?php
 namespace Kafoso\DoctrineFirebirdDriver\Test\Integration\Doctrine\DBAL\Database\Table\Column;
 
+use Doctrine\DBAL\Driver\PDOStatement;
 use Doctrine\DBAL\Schema\Comparator;
-use Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Statement;
 use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
 use Kafoso\DoctrineFirebirdDriver\Schema\FirebirdInterbaseSchemaManager;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class AlterColumnsTest extends AbstractIntegrationTest
 {
     /**
@@ -57,21 +60,21 @@ class AlterColumnsTest extends AbstractIntegrationTest
             AND RF.RDB\$FIELD_NAME = 'FOO'"
         );
         $result = $connection->query($sql);
-        $this->assertInstanceOf(Statement::class, $result);
+        $this->assertInstanceOf(PDOStatement::class, $result);
         $row = $result->fetch();
         $this->assertInternalType('array', $row);
         $this->assertArrayHasKey('RDB$FIELD_TYPE', $row);
         $this->assertSame($expectedFieldType, $row['RDB$FIELD_TYPE'], "Invalid field type. SQL: " . self::statementArrayToText($statements));
 
         if (isset($options['notnull'])) {
-            $this->assertSame($options['notnull'], boolval(intval($row['RDB$NULL_FLAG_01'])), "Invalid notnull. SQL: " . self::statementArrayToText($statements));
+            $this->assertSame($options['notnull'], boolval(intval($row['RDB$NULL_FLAG'])), "Invalid notnull. SQL: " . self::statementArrayToText($statements));
         }
         if (isset($options['length'])) {
             $this->assertSame($options['length'], intval($row['RDB$CHARACTER_LENGTH']), "Invalid length. SQL: " . self::statementArrayToText($statements));
         }
         if (isset($options['default'])) {
             /**
-             * Use RF.RDB$DEFAULT_SOURCE instead of RF.RDB$DEFAULT_VALUE becuase the latter is binary.
+             * Use RF.RDB$DEFAULT_SOURCE instead of RF.RDB$DEFAULT_VALUE because the latter is binary.
              */
             $default = $options['default'];
             switch ($expectedFieldType) {
@@ -81,10 +84,10 @@ class AlterColumnsTest extends AbstractIntegrationTest
                     break;
             }
             if (is_string($default)) {
-                $default = "'{$default}'";
+                $default = "'" . str_replace("'", "''", $default) . "'";
             }
             $expected = "DEFAULT {$default}";
-            $this->assertSame($expected, $row['RDB$DEFAULT_SOURCE_01'], "Invalid default. SQL: " . self::statementArrayToText($statements));
+            $this->assertSame($expected, $row['RDB$DEFAULT_SOURCE'], "Invalid default. SQL: " . self::statementArrayToText($statements));
         }
     }
 

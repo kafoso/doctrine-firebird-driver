@@ -6,6 +6,9 @@ use Kafoso\DoctrineFirebirdDriver\Test\Resource\Entity;
 
 class FindAllTest extends AbstractIntegrationTest
 {
+    /**
+     * @runInSeparateProcess
+     */
     public function testFindByAlbum()
     {
         $albums = $this->_entityManager->getRepository(Entity\Album::class)->findAll();

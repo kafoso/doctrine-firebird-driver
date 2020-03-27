@@ -111,31 +111,27 @@ class FirebirdInterbaseSchemaManager extends AbstractSchemaManager
         $type = $this->_platform->getDoctrineTypeMapping($dbType);
 
         switch ($tableColumn['FIELD_TYPE']) {
-            case self::META_FIELD_TYPE_CHAR: {
-                    $fixed = true;
-                    break;
-                }
+            case self::META_FIELD_TYPE_CHAR:
+                $fixed = true;
+                break;
             case self::META_FIELD_TYPE_SHORT:
             case self::META_FIELD_TYPE_LONG:
             case self::META_FIELD_TYPE_INT64:
             case self::META_FIELD_TYPE_DOUBLE:
-            case self::META_FIELD_TYPE_FLOAT: {
-                    // Firebirds reflection of the datatype is quite "creative": If a numeric or decimal field is defined,
-                    // the field-type reflects the internal datattype (e.g, and sub_type specifies, if decimal or numeric
-                    // has been used. Thus, we need to override the datatype if necessary.
-                    if ($tableColumn['FIELD_SUB_TYPE'] > 0) {
-                        $type = 'decimal';
-                    }
-                    $options['length'] = null;
-                    break;
+            case self::META_FIELD_TYPE_FLOAT:
+                // Firebirds reflection of the datatype is quite "creative": If a numeric or decimal field is defined,
+                // the field-type reflects the internal datattype (e.g, and sub_type specifies, if decimal or numeric
+                // has been used. Thus, we need to override the datatype if necessary.
+                if ($tableColumn['FIELD_SUB_TYPE'] > 0) {
+                    $type = 'decimal';
                 }
-            case self::META_FIELD_TYPE_BLOB: {
-                    switch ($tableColumn['FIELD_SUB_TYPE']) {
-                        case 1: {
-                                $type = 'text';
-                                break;
-                            }
-                    }
+                $options['length'] = null;
+                break;
+            case self::META_FIELD_TYPE_BLOB:
+                switch ($tableColumn['FIELD_SUB_TYPE']) {
+                    case 1:
+                        $type = 'text';
+                        break;
                 }
         }
 

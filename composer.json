@@ -28,11 +28,13 @@
         }
     },
     "require": {
-        "doctrine/dbal": ">=2.5 <=2.5.13",
-        "php": ">=7.1"
+        "php": ">=7.2",
+        "ext-pdo": "*",
+        "ext-pdo_firebird": "*",
+        "doctrine/dbal": "^2.9.3",
+        "doctrine/orm": "2.7.*"
     },
     "require-dev": {
-        "doctrine/orm": "2.5.*",
         "phpunit/phpunit": "^5.7"
     }
 }

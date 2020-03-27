@@ -1,11 +1,13 @@
 <?php
 namespace Kafoso\DoctrineFirebirdDriver\Test\Integration\Doctrine\DBAL\Database\Table\Column;
 
-use Doctrine\DBAL\Schema\Comparator;
-use Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Statement;
+use Doctrine\DBAL\Driver\PDOStatement;
 use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
 use Kafoso\DoctrineFirebirdDriver\Schema\FirebirdInterbaseSchemaManager;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class CreateWithColumnsTest extends AbstractIntegrationTest
 {
     /**
@@ -38,14 +40,14 @@ class CreateWithColumnsTest extends AbstractIntegrationTest
             AND RF.RDB\$FIELD_NAME = 'FOO'"
         );
         $result = $connection->query($sql);
-        $this->assertInstanceOf(Statement::class, $result);
+        $this->assertInstanceOf(PDOStatement::class, $result);
         $row = $result->fetch();
         $this->assertInternalType('array', $row);
         $this->assertArrayHasKey('RDB$FIELD_TYPE', $row);
         $this->assertSame($expectedFieldType, $row['RDB$FIELD_TYPE'], "Invalid field type.");
 
         if (isset($options['notnull'])) {
-            $this->assertSame($options['notnull'], boolval(intval($row['RDB$NULL_FLAG_01'])), "Invalid notnull.");
+            $this->assertSame($options['notnull'], boolval(intval($row['RDB$NULL_FLAG'])), "Invalid notnull.");
         }
         if (isset($options['length'])) {
             $this->assertSame($options['length'], intval($row['RDB$CHARACTER_LENGTH']), "Invalid length.");
@@ -62,10 +64,10 @@ class CreateWithColumnsTest extends AbstractIntegrationTest
                     break;
             }
             if (is_string($default)) {
-                $default = "'{$default}'";
+                $default = "'" . str_replace("'", "''", $default) . "'";
             }
             $expected = "DEFAULT {$default}";
-            $this->assertSame($expected, $row['RDB$DEFAULT_SOURCE_01'], "Invalid default.");
+            $this->assertSame($expected, $row['RDB$DEFAULT_SOURCE'], "Invalid default.");
         }
     }
 
@@ -165,7 +167,7 @@ class CreateWithColumnsTest extends AbstractIntegrationTest
             WHERE RF.RDB\$RELATION_NAME = '{$tableName}'"
         );
         $result = $connection->query($sql);
-        $this->assertInstanceOf(Statement::class, $result);
+        $this->assertInstanceOf(PDOStatement::class, $result);
         $rows = $result->fetchAll();
         $this->assertInternalType('array', $rows);
         $this->assertCount(count($columns), $rows, 'Row count does not match column count');
@@ -176,7 +178,7 @@ class CreateWithColumnsTest extends AbstractIntegrationTest
         }
 
         foreach ($rows as $row) {
-            $fieldName = trim($row['RDB$FIELD_NAME_01']);
+            $fieldName = trim($row['RDB$FIELD_NAME']);
             $this->assertArrayHasKey($fieldName, $columnsIndexed);
             $column = $columnsIndexed[$fieldName];
             $this->assertArrayHasKey('RDB$FIELD_TYPE', $row);
@@ -213,7 +215,7 @@ class CreateWithColumnsTest extends AbstractIntegrationTest
             $this->assertSame($expectedPrecision, $row['RDB$FIELD_PRECISION'], 'Invalid precision');
             $this->assertSame($column->getScale(), $row['RDB$FIELD_SCALE'], 'Invalid scale');
             $this->assertSame($expectedFixed, ($expectedType == FirebirdInterbaseSchemaManager::META_FIELD_TYPE_CHAR), 'Invalid fixed');
-            $this->assertSame($column->getNotnull(), boolval($row['RDB$NULL_FLAG_01']), 'Invalid notnull');
+            $this->assertSame($column->getNotnull(), boolval($row['RDB$NULL_FLAG']), 'Invalid notnull');
 
             $expectedDefaultSource = $expectedDefault;
             if (null !== $expectedDefaultSource) {
@@ -236,8 +238,8 @@ class CreateWithColumnsTest extends AbstractIntegrationTest
             } else {
                 $expectedDefaultSource = "DEFAULT {$expectedDefaultSource}";
             }
-            // Use RF.RDB$DEFAULT_SOURCE instead of RF.RDB$DEFAULT_VALUE becuase the latter is binary.
-            $this->assertSame($expectedDefaultSource, $row['RDB$DEFAULT_SOURCE_01'], 'Invalid default');
+            // Use RF.RDB$DEFAULT_SOURCE instead of RF.RDB$DEFAULT_VALUE because the latter is binary.
+            $this->assertSame($expectedDefaultSource, $row['RDB$DEFAULT_SOURCE'], 'Invalid default');
         }
     }
 }

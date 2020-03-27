@@ -1,46 +1,53 @@
 <?php
 namespace Kafoso\DoctrineFirebirdDriver\Test\Integration\Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase;
 
-use Kafoso\DoctrineFirebirdDriver\Driver\FirebirdInterbase\Connection;
+use Doctrine\DBAL\Driver\PDOConnection;
+use Doctrine\DBAL\Driver\PDOStatement;
 use Kafoso\DoctrineFirebirdDriver\Test\Integration\AbstractIntegrationTest;
-use Kafoso\DoctrineFirebirdDriver\Test\Resource\Entity;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class ConnectionTest extends AbstractIntegrationTest
 {
-    /**
-     * @runInSeparateProcess
-     */
-    public function testLastInsertIdWorks()
+    public function testBasics()
     {
-        $id = $this->_entityManager->getConnection()->lastInsertId('ALBUM_ID_SEQ');
-        $this->assertSame(2, $id); // 2x ALBUM are inserted in database_setup.sql
-        $albumA = new Entity\Album("Foo");
-        $this->_entityManager->persist($albumA);
-        $this->_entityManager->flush($albumA);
-        $idA = $this->_entityManager->getConnection()->lastInsertId('ALBUM_ID_SEQ');
-        $this->assertSame(3, $idA);
-        $albumB = new Entity\Album("Foo");
-        $this->_entityManager->persist($albumB);
-        $this->_entityManager->flush($albumB);
-        $idB = $this->_entityManager->getConnection()->lastInsertId('ALBUM_ID_SEQ');
-        $this->assertSame(4, $idB);
+        $connection = $this->_entityManager->getConnection()->getWrappedConnection();
+        $this->assertInstanceOf(PDOConnection::class, $connection);
+        $this->assertFalse($connection->requiresQueryForServerVersion());
+        $this->assertInstanceOf(PDOStatement::class, $connection->prepare("SELECT 1 FROM RDB\$DATABASE"));
+        $this->assertSame("'''foo'''", $connection->quote("'foo'"));
     }
 
     /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Argument $name must be null or a string. Found: (integer) 42
+     * @expectedException \PDOException
+     * @expectedExceptionMessage SQLSTATE[IM001]: Driver does not support this function: driver does not support that attribute
      */
-    public function testLastInsertIdThrowsExceptionWhenArgumentNameIsInvalid()
+    public function testGetAttributeThrowsExceptionForUnknownAttribute()
     {
-        $this->_entityManager->getConnection()->lastInsertId(42);
+        $connection = $this->_entityManager->getConnection()->getWrappedConnection();
+        $connection->getAttribute(-1);
     }
 
     /**
-     * @expectedException \UnexpectedValueException
-     * @expectedExceptionMessageRegExp /^Expects argument \$name to match regular expression '.+?'\. Found\: \(string\) "FOO_Ø"$/
+     * @expectedException \Doctrine\DBAL\Driver\PDOException
+     * @expectedExceptionMessage SQLSTATE[IM001]: Driver does not support this function: driver does not support lastInsertId()
      */
-    public function testLastInsertIdThrowsExceptionWhenArgumentNameContainsInvalidCharacters()
+    public function testLastInsertIdThrowsAnException()
     {
-        $this->_entityManager->getConnection()->lastInsertId("FOO_Ø");
+        $this->_entityManager->getConnection()->lastInsertId('ALBUM_ID_SEQ');
+    }
+
+    public function testTransactionFlow()
+    {
+        $connection = $this->_entityManager->getConnection()->getWrappedConnection();
+
+        $this->assertFalse($connection->inTransaction());
+
+        $connection->beginTransaction();
+        $this->assertTrue($connection->inTransaction());
+
+        $connection->commit();
+        $this->assertFalse($connection->inTransaction());
     }
 }

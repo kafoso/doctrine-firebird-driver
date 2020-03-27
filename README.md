@@ -1,7 +1,7 @@
 Doctrine Firebird driver
 ---------------------------
 
-Firebird driver for the [Doctrine DBAL](https://github.com/doctrine/dbal).
+Firebird driver for the [Doctrine DBAL](https://github.com/doctrine/dbal) ([v2.7.*](https://packagist.org/packages/doctrine/orm#v2.7.0)).
 
 This library is completely separate (i.e. abstracted away) from the core Doctrine DBAL library. I.e. it is fully a **plug-in**.
 
@@ -11,14 +11,25 @@ To utilize this library in your application code, the following is required:
 
 - [Firebird](https://firebirdsql.org/) version 2.5.*
   - Version 3.* is not supported. You are very welcome to provide a pull request for this.
-- PHP >= 7.1
-- PHP extensions<sup>1</sup>:
-  - [ibase](http://php.net/manual/en/book.ibase.php)
+- PHP >= 7.2
+- PHP extensions:
+  - [pdo](http://php.net/manual/en/book.pdo.php)
+  - [pdo-firebird](https://www.php.net/manual/en/ref.pdo-firebird.php)
   - [mbstring](http://php.net/manual/en/book.mbstring.php)
   - xml
-- [doctrine/dbal: >=2.5 <=2.5.13](https://packagist.org/packages/doctrine/dbal#v2.5.0)
+- [doctrine/dbal: ^2.9.3](https://packagist.org/packages/doctrine/dbal#v2.9.3)
 
-<sup>1</sup> Only needed on remote/guest OS, e.g. a remote Ubuntu server or a VM installed through Docker, Vagrant, or XAMPP.
+## On `pdo-firebird` vs `interbase`/`ibase`
+
+PDO was chosen because support for the `interbase` extension was dropped in PHP 7.4 and it was moved into PECL. However, as of March 2020, the [project on PECL](http://pecl.php.net/package/interbase) has had no releases yet (see issue #9).
+
+If this is not a concern for you and you prefer the driver to use the `interbase` PHP extension and `ibase_*` functions instead of PDO, have a look at the 2.7 branch of this repository. Admittedly, that branch has a couple extra features which aren't available in this branch (yet?). These are:
+- Support for last insert id. The `pdo-firebird` extension doesn't support this natively. In 2.7 it is implemented by using a query, but it requires the name of a sequence as an argument. Not sure if implementing it in PDO this way would be much of a win.
+- Support for different transaction isolation levels. Firebird does them a bit differently from other RDBMS implementations, and PDO doesn't seem to expect that, thus workarounds are needed. It appears we'd have to handle transactions on our side without relying on PDO.
+- Transaction lock timeouts and waiting. Again, to do this, we would have to handle transactions ourselves.
+- Autocommitting changes from last queries during object destruction, if they were not made within an explicit transaction. Again, the test just kept failing and both my patience and time were running out.
+- Quoting queries without calling the constructor first. That's just not how PDO operates, and likely for a good reason.
+- Different Firebird SQL dialects are only supported with PHP 7.4 and up (this was only implemented in ext-pdo-firebird [in 7.4](http://docs.php.net/manual/en/ref.pdo-firebird.connection.php)).
 
 # License & Disclaimer
 
@@ -49,11 +60,11 @@ Via Github:
 
 For example of configuration in PHP, see [`tests/tests/Test/Integration/AbstractIntegrationTest.php`](tests/tests/Test/Integration/AbstractIntegrationTest.php) (in the method `setUp`).
 
-Additional help may be found at: https://www.doctrine-project.org/projects/doctrine-orm/en/2.5/reference/advanced-configuration.html
+Additional help may be found at: https://www.doctrine-project.org/projects/doctrine-orm/en/2.7/index.html
 
 ### Symfony configuration (YAML)
 
-This driver may be used like any other Doctrine DBAL driver in [Symfony](https://symfony.com/). However, the `driver_class` option must be specified instead of simply `driver`. This is due to the driver not being part of the [core Doctrine DBAL library](https://github.com/doctrine/dbal).
+This driver may be used like any other Doctrine DBAL driver in [Symfony](https://symfony.com/), e.g. with [doctrine/doctrine-bundle](https://packagist.org/packages/doctrine/doctrine-bundle). However, the `driver_class` option must be specified instead of simply `driver`. This is due to the driver not being part of the [core Doctrine DBAL library](https://github.com/doctrine/dbal).
 
 Sample YAML configuration:
 
@@ -111,7 +122,7 @@ Due to the database being created by the PHP bootstrap script on the fly, `root`
 6. `cd /var/git/kafoso/doctrine-firebird-driver`
 7. `composer install`<sup>1</sup>
 8. `cd /var/git/kafoso/doctrine-firebird-driver/tests`
-9. `php ../bin/phpunit tests`
+9. `../bin/phpunit tests`
 
 <sup>1</sup> Composer will say you shouldn't run it as root/super user. This is techically true, but it's fine in the VM.
 
@@ -124,12 +135,14 @@ https://github.com/kafoso<br>
 E-mail: soefritz@gmail.com
 - **Uffe Pedersen**<br>
 https://github.com/upmedia
+- **Rimas Kudelis**<br>
+https://github.com/rimas-kudelis
 
 ## Acknowledgements
 
 ### https://github.com/doctrine/dbal
 
-Fundamental Doctrine DBAL implementation. The driver and platform logic in this library is based on other implementations in the core library, largely [`\Doctrine\DBAL\Driver\PDOOracle\Driver`](https://github.com/doctrine/dbal/blob/v2.5.0/lib/Doctrine/DBAL/Driver/PDOOracle/Driver.php) and [`\Doctrine\DBAL\Platforms\OraclePlatform`](https://github.com/doctrine/dbal/blob/v2.5.0/lib/Doctrine/DBAL/Platforms/OraclePlatform.php), and their respective parent classes.
+Fundamental Doctrine DBAL implementation. The driver and platform logic in this library is based on other implementations in the core library, largely [`\Doctrine\DBAL\Driver\PDOOracle\Driver`](https://github.com/doctrine/dbal/blob/v2.9.3/lib/Doctrine/DBAL/Driver/PDOOracle/Driver.php) and [`\Doctrine\DBAL\Platforms\OraclePlatform`](https://github.com/doctrine/dbal/blob/v2.9.3/lib/Doctrine/DBAL/Platforms/OraclePlatform.php), and their respective parent classes.
 
 ### https://github.com/helicon-os/doctrine-dbal
 
