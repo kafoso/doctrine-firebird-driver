@@ -28,11 +28,11 @@
         }
     },
     "require": {
-        "php": ">=7.2",
-        "doctrine/dbal": "^2.9.3",
-        "doctrine/orm": "2.7.*"
+        "php": ">=7.3",
+        "doctrine/dbal": "^3.3",
+        "doctrine/orm": "^2.11"
     },
     "require-dev": {
-        "phpunit/phpunit": "^5.7"
+        "phpunit/phpunit": "^9.5"
     }
 }
